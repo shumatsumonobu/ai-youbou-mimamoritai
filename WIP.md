@@ -2,15 +2,15 @@
 
 ## 前回やったこと
 
-初回リリース準備。README / DESIGN リライト、汎用デフォルト config 作成、sample-data.csv 追加、ソースコメント追加、.gitignore / .env.example 整備。
+- スクショ5枚撮って screenshots/ に配置（main / summary / comment / settings-columns / settings-alerts）
+- README.md のスクショコメントアウト外した
+- スプシ名は「AI要望みまもり隊 - サンプル」に決定
 
 ## 次やること
 
-- スクショ撮って screenshots/ に配置（main.png / summary.png / comment.png）
-- README.md のスクショのコメントアウトを外す
-- 初回コミット & GitHub push
+- コミット & push（スクショ追加 + README更新）
 
 ## メモ
 
 - config.local.json / .env.local は会社用バックアップ（gitignore済み）
-- スクショはサンプルデータで撮ると統一感出る
+- sample-data.csv の30件でスクショ撮影済み
