@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI要望みまもり隊</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            base: { 50: '#faf8ff', 100: '#f3edff', 200: '#e9dfff' },
+          },
+        },
+      },
+      safelist: [
+        'bg-blue-50', 'text-blue-700', 'before:bg-blue-400',
+        'bg-amber-50', 'text-amber-700', 'before:bg-amber-400',
+        'bg-red-50', 'text-red-700', 'before:bg-red-400',
+        'bg-slate-50', 'text-slate-700', 'before:bg-slate-400',
+        'bg-purple-50', 'text-purple-700', 'before:bg-purple-400',
+      ],
+    };
+  </script>
+  <link href="https://unpkg.com/tabulator-tables@6/dist/css/tabulator_simple.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/tabulator-tables@6/dist/js/tabulator.min.js"></script>
+  <style>
+    body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; background: #faf8ff; color: #000; }
+    .tabulator { border: none; border-radius: 16px; background: #fff; font-size: 14px; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; overflow: hidden; box-shadow: 0 1px 4px rgba(100,60,180,0.08); }
+    .tabulator .tabulator-header { background: #f3edff; color: #5b4a7a; border-bottom: 2px solid #e4d8f8; font-weight: 500; }
+    .tabulator .tabulator-header .tabulator-col { background: #f3edff; border-right: 1px solid #e4d8f8; }
+    .tabulator .tabulator-header .tabulator-col:hover { background: #f3edff; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row { background: #fff; color: #000; border-bottom: 1px solid #f5f0ff; cursor: pointer; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover { background: #ede5ff; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even { background: #fdfbff; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover { background: #ede5ff; }
+    .tabulator .tabulator-cell { white-space: normal; word-break: break-all; }
+
+    .fab-container { position: fixed; bottom: 32px; right: 32px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+    .fab { height: 88px; border-radius: 44px; background: linear-gradient(135deg, #a78bfa, #7c3aed); color: #fff; border: none; cursor: pointer; box-shadow: 0 6px 24px rgba(124,58,237,0.4); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 36px; font-size: 20px; font-weight: 700; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; transition: all 0.2s; letter-spacing: 0.05em; }
+    .fab:hover { transform: scale(1.05); box-shadow: 0 8px 32px rgba(124,58,237,0.5); }
+    .fab:active { transform: scale(0.97); }
+    .fab-ring { position: absolute; inset: -8px; border-radius: 52px; border: 2px solid rgba(167,139,250,0.4); animation: fab-pulse 2s ease-in-out infinite; pointer-events: none; }
+    @keyframes fab-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0; transform: scale(1.15); } }
+    @keyframes bounce-in { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+    .summary-card { animation: bounce-in 0.3s ease-out; }
+    .chat-bubble { background: #f3edff; border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 14px; line-height: 1.7; color: #3d2e5c; font-weight: 500; position: relative; }
+    @keyframes modal-in { 0% { opacity: 0; transform: scale(0.9) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    .animate-modal-in { animation: modal-in 0.25s ease-out; }
+  </style>
+</head>
+<body class="min-h-screen p-4 pb-28">
+  <!-- Header -->
+  <div class="sticky top-0 z-30 bg-[#faf8ff]/90 backdrop-blur-sm max-w-7xl mx-auto mb-5 flex items-center justify-between py-3">
+    <h1 class="text-xl font-bold text-violet-700 tracking-wide">AI要望みまもり隊</h1>
+    <div class="flex items-center gap-3">
+    <a href="/settings.html" class="w-9 h-9 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center transition text-violet-500 hover:text-violet-700" title="設定">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+    <select id="persona-select" class="bg-white text-violet-700 font-bold text-xl rounded-2xl px-6 py-4 border-2 border-violet-200 shadow-sm cursor-pointer hover:border-violet-400 transition">
+    </select>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="max-w-7xl mx-auto mb-4">
+    <div class="bg-white rounded-2xl shadow-sm px-5 py-4 flex flex-col gap-3">
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <label class="flex items-center gap-1.5 cursor-pointer border-r border-violet-100 pr-5">
+          <input type="checkbox" id="filter-alert" class="w-4 h-4 accent-violet-500 rounded">
+          <span class="text-violet-700 text-sm font-medium">要注意のみ</span>
+          <span id="alert-info" class="relative group ml-1">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-500 hover:bg-violet-200 hover:text-violet-700 transition cursor-help text-xs font-bold leading-none">?</span>
+            <div id="alert-tooltip" class="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-xl shadow-lg border border-violet-100 p-3 w-56 z-50 text-xs text-stone-600 leading-relaxed"></div>
+          </span>
+        </label>
+        <div id="filter-status" class="flex flex-wrap items-center gap-x-3 gap-y-1"></div>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <select id="filter-owner" class="bg-base-100 text-stone-600 rounded-lg px-3 py-1.5 text-sm border border-violet-100">
+          <option value=""></option>
+        </select>
+        <select id="filter-client" class="bg-base-100 text-stone-600 rounded-lg px-3 py-1.5 text-sm border border-violet-100 max-w-[200px]">
+          <option value=""></option>
+        </select>
+        <select id="sort-select" class="bg-base-100 text-stone-600 rounded-lg px-3 py-1.5 text-sm border border-violet-100">
+          <option value="">並び替え</option>
+        </select>
+        <button id="clear-btn" class="text-stone-400 hover:text-violet-500 text-sm transition">クリア</button>
+        <span id="count-label" class="text-stone-400 text-sm ml-auto"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <div class="text-base text-violet-500 font-medium mb-2 px-1">行をクリックするとAIがコメントしてくれるよ</div>
+    <div id="issues-table"></div>
+  </div>
+
+  <!-- AI Summary Modal -->
+  <div id="summary-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div id="summary-backdrop" class="absolute inset-0 bg-black/25 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-[90vw] max-w-4xl max-h-[80vh] flex flex-col overflow-hidden animate-modal-in">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-violet-50">
+        <h2 class="text-lg font-bold text-violet-700">がんばって読んできた！</h2>
+        <button id="summary-close" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-violet-100 flex items-center justify-center transition text-stone-400 hover:text-violet-500">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="score-area" class="hidden px-6 py-5 border-b border-violet-50 flex items-center gap-5">
+        <div class="text-center">
+          <div class="text-xs text-stone-400 mb-1">いまの調子</div>
+          <div class="flex items-end gap-1">
+            <span id="score-value" class="text-5xl font-bold leading-none"></span>
+            <span class="text-sm text-stone-400 pb-1">/ 100</span>
+          </div>
+        </div>
+        <div id="score-comment" class="text-base font-bold"></div>
+      </div>
+      <div id="summary-content" class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <div class="fab-container">
+    <button id="fab-btn" class="fab relative">
+      <span class="fab-ring"></span>
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1a3 3 0 0 1 3 3v1a2 2 0 0 1-2 2h-1l-2 5H10l-2-5H7a2 2 0 0 1-2-2v-1a3 3 0 0 1 3-3V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/></svg>
+      AI 召喚
+    </button>
+  </div>
+
+  <!-- Row Comment Modal -->
+  <div id="comment-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div id="comment-backdrop" class="absolute inset-0 bg-black/25 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-[90vw] max-w-md p-6 animate-modal-in">
+      <button id="comment-close" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-stone-100 hover:bg-violet-100 flex items-center justify-center transition text-stone-400 hover:text-violet-500">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="comment-title" class="text-sm font-bold text-violet-700 mb-3 pr-8"></div>
+      <div id="comment-body" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white rounded-3xl p-8 text-center shadow-xl">
+      <div class="relative w-16 h-16 mx-auto mb-4">
+        <div class="absolute inset-0 rounded-full border-4 border-violet-100"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-violet-400 border-t-transparent animate-spin"></div>
+      </div>
+      <p id="loading-text" class="text-violet-600 text-base font-bold"></p>
+    </div>
+  </div>
+
+  <script>
+    let table;
+    let allData = [];
+    let alertMode = false;
+    let CFG = {};
+
+    // --- utils ---
+
+    function esc(str) {
+      const d = document.createElement("div");
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function showLoading(msg) {
+      document.getElementById("loading-text").textContent = msg;
+      document.getElementById("loading").classList.remove("hidden");
+    }
+    function hideLoading() {
+      document.getElementById("loading").classList.add("hidden");
+    }
+
+    // --- config-driven helpers ---
+
+    function colDef(role) { return CFG.columns.find((c) => c.role === role); }
+    function col(role) { return (colDef(role) || {}).name; }
+
+    let _incomplete = [];
+    function cacheIncomplete() {
+      const sf = (colDef("status") || {}).field || {};
+      _incomplete = (sf.groups && sf.groups.incomplete) || [];
+    }
+
+    let _today = new Date(new Date().toDateString());
+    function refreshToday() { _today = new Date(new Date().toDateString()); }
+
+    function evalRule(rule, row) {
+      const status = row[col("status")];
+      if (rule.type === "overdue") {
+        const val = row[col(rule.column)];
+        if (!val || !_incomplete.includes(status)) return false;
+        return new Date(val) < _today;
+      }
+      if (rule.type === "nearDeadline") {
+        const val = row[col(rule.column)];
+        if (!val || !_incomplete.includes(status)) return false;
+        const d = new Date(val);
+        const diff = (d - _today) / (1000 * 60 * 60 * 24);
+        return diff >= 0 && diff <= (rule.days || 7);
+      }
+      if (rule.type === "statusMatch") {
+        return (rule.values || []).includes(status);
+      }
+      if (rule.type === "fieldMatch") {
+        const val = row[col(rule.column)];
+        return (rule.values || []).includes(val);
+      }
+      return false;
+    }
+
+    function isAlert(row) {
+      if (!_incomplete.includes(row[col("status")])) return false;
+      return (CFG.alerts.rules || []).some((rule) => evalRule(rule, row));
+    }
+
+    function isOverdue(row) {
+      return (CFG.alerts.rules || []).filter((r) => r.type === "overdue").some((r) => evalRule(r, row));
+    }
+
+    function isNearDeadline(row) {
+      return (CFG.alerts.rules || []).filter((r) => r.type === "nearDeadline").some((r) => evalRule(r, row));
+    }
+
+    function updateCount() {
+      const rows = table.getRows("active");
+      document.getElementById("count-label").textContent = `${rows.length} 件`;
+    }
+
+    // --- dynamic UI builders ---
+
+    function buildStatusFilters() {
+      const container = document.getElementById("filter-status");
+      const sf = ((colDef("status") || {}).field) || {};
+      (sf.values || []).forEach((s) => {
+        const color = (sf.colors && sf.colors[s]) || "#78716c";
+        const label = (sf.labels && sf.labels[s]) || s;
+        const lbl = document.createElement("label");
+        lbl.className = "flex items-center gap-1 cursor-pointer";
+        lbl.innerHTML = `<input type="checkbox" value="${s}" class="status-cb w-3.5 h-3.5 rounded" style="accent-color:${esc(color)}"><span class="text-sm" style="color:${esc(color)}">${esc(label)}</span>`;
+        container.appendChild(lbl);
+      });
+    }
+
+    function buildSortOptions() {
+      const select = document.getElementById("sort-select");
+      CFG.table.visibleColumns.forEach((role) => {
+        const def = colDef(role);
+        if (!def) return;
+        const optAsc = document.createElement("option");
+        optAsc.value = `${def.name}:asc`;
+        optAsc.textContent = `${def.label} ↑`;
+        select.appendChild(optAsc);
+        const optDesc = document.createElement("option");
+        optDesc.value = `${def.name}:desc`;
+        optDesc.textContent = `${def.label} ↓`;
+        select.appendChild(optDesc);
+      });
+    }
+
+    function fieldFormatter(role) {
+      const def = colDef(role);
+      if (!def || !def.field) return null;
+      return function (cell) {
+        const val = cell.getValue();
+        const f = def.field;
+        const color = (f.colors && f.colors[val]) || "#78716c";
+        const lbl = (f.labels && f.labels[val]) || val;
+        return `<span style="color:${esc(color)};font-weight:500">${esc(lbl) || ""}</span>`;
+      };
+    }
+
+    let _alertColors = {};
+    function cacheAlertColors() {
+      (CFG.alerts.rules || []).forEach((r) => {
+        if (r.color) _alertColors[r.type] = r.color;
+      });
+    }
+
+    function dateFormatter(cell) {
+      const row = cell.getRow().getData();
+      const val = cell.getValue();
+      if (!val) return "";
+      if (isOverdue(row)) return `<span style="color:${esc(_alertColors.overdue || '#ef4444')}">${esc(val)}</span>`;
+      if (isNearDeadline(row)) return `<span style="color:${esc(_alertColors.nearDeadline || '#d97706')}">${esc(val)}</span>`;
+      return val;
+    }
+
+    function buildTableColumns() {
+      const frozen = new Set(CFG.table.frozenColumns);
+      const dateRoles = new Set((CFG.alerts.rules || []).filter((r) => r.type === "overdue" || r.type === "nearDeadline").map((r) => r.column));
+
+      return CFG.table.visibleColumns.map((role) => {
+        const def = colDef(role);
+        if (!def) return null;
+        const col = { title: def.label, field: def.name, headerHozAlign: "center" };
+        if (frozen.has(role)) col.frozen = true;
+        if (def.grow) col.widthGrow = 3;
+        else col.width = def.width || 120;
+        if (def.align) col.hozAlign = def.align;
+
+        if (def.field) col.formatter = fieldFormatter(role);
+        else if (dateRoles.has(role)) col.formatter = dateFormatter;
+
+        return col;
+      }).filter(Boolean);
+    }
+
+    // --- data loading ---
+
+    async function loadData() {
+      refreshToday();
+      const res = await fetch("/api/issues");
+      allData = await res.json();
+
+      const ownerCol = col("owner");
+      const clientCol = col("client");
+      const owners = [...new Set(allData.map((r) => r[ownerCol]).filter(Boolean))].sort();
+      const clients = [...new Set(allData.map((r) => r[clientCol]).filter(Boolean))].sort();
+
+      const ownerSelect = document.getElementById("filter-owner");
+      owners.forEach((o) => {
+        const opt = document.createElement("option");
+        opt.value = o;
+        opt.textContent = o;
+        ownerSelect.appendChild(opt);
+      });
+
+      const clientSelect = document.getElementById("filter-client");
+      clients.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        clientSelect.appendChild(opt);
+      });
+
+      table = new Tabulator("#issues-table", {
+        data: allData,
+        layout: "fitColumns",
+        pagination: false,
+        headerSort: false,
+        columns: buildTableColumns(),
+        dataLoaded: updateCount,
+        dataFiltered: updateCount,
+      });
+      table.on("rowClick", onRowClick);
+    }
+
+    // --- filters ---
+
+    function getSelectedStatuses() {
+      return [...document.querySelectorAll(".status-cb:checked")].map((cb) => cb.value);
+    }
+
+    function applyFilters() {
+      const statuses = getSelectedStatuses();
+      const owner = document.getElementById("filter-owner").value;
+      const client = document.getElementById("filter-client").value;
+      const statusCol = col("status");
+      const ownerCol = col("owner");
+      const clientCol = col("client");
+
+      let filtered = allData;
+      if (alertMode) filtered = filtered.filter(isAlert);
+      if (statuses.length > 0) filtered = filtered.filter((r) => statuses.includes(r[statusCol]));
+      if (owner) filtered = filtered.filter((r) => r[ownerCol] === owner);
+      if (client) filtered = filtered.filter((r) => r[clientCol] === client);
+      table.setData(filtered);
+    }
+
+    document.getElementById("filter-alert").addEventListener("change", (e) => {
+      alertMode = e.target.checked;
+      applyFilters();
+    });
+
+    document.getElementById("filter-owner").addEventListener("change", applyFilters);
+    document.getElementById("filter-client").addEventListener("change", applyFilters);
+
+    document.getElementById("clear-btn").addEventListener("click", () => {
+      document.getElementById("filter-alert").checked = false;
+      alertMode = false;
+      document.querySelectorAll(".status-cb").forEach((cb) => cb.checked = false);
+      document.getElementById("filter-owner").value = "";
+      document.getElementById("filter-client").value = "";
+      document.getElementById("sort-select").value = "";
+      table.clearSort();
+      applyFilters();
+    });
+
+    document.getElementById("sort-select").addEventListener("change", (e) => {
+      const val = e.target.value;
+      if (!val) { table.clearSort(); return; }
+      const [field, dir] = val.split(":");
+      table.setSort(field, dir);
+    });
+
+    // --- AI summary ---
+
+    const SECTION_META = {
+      actions:    { title: "今週これやって！", color: "blue" },
+      workload:   { title: "ちょっと偏ってない？", color: "amber" },
+      risk:       { title: "やばいかも…", color: "red" },
+      stagnation: { title: "止まってるよ？", color: "slate" },
+      clients:    { title: "このクライアント注意", color: "purple" },
+    };
+
+    function renderSummary(summary) {
+      const container = document.getElementById("summary-content");
+      container.innerHTML = "";
+      let delay = 0;
+      for (const [key, meta] of Object.entries(SECTION_META)) {
+        const section = summary[key];
+        if (!section || !section.items || section.items.length === 0) continue;
+        const card = document.createElement("div");
+        card.className = "summary-card";
+        card.style.animationDelay = `${delay}ms`;
+        card.innerHTML = `
+          <div class="mb-2">
+            <span class="inline-block text-xs font-bold text-${meta.color}-700 bg-${meta.color}-50 px-3 py-1 rounded-full">${meta.title}</span>
+          </div>
+          <div class="space-y-2">
+            ${section.items.map((item) => `<div class="chat-bubble">${esc(item)}</div>`).join("")}
+          </div>
+        `;
+        container.appendChild(card);
+        delay += 80;
+      }
+    }
+
+    function getScoreColor(score) {
+      const thresholds = CFG.alerts.scoreColors || [];
+      for (const t of thresholds) {
+        if (score >= t.min) return t.color;
+      }
+      return "#78716c";
+    }
+
+    function showScore(score, aiComment) {
+      const area = document.getElementById("score-area");
+      const val = document.getElementById("score-value");
+      const comment = document.getElementById("score-comment");
+      if (score == null) { area.classList.add("hidden"); return; }
+
+      const color = getScoreColor(score);
+      val.textContent = score;
+      val.style.color = color;
+      comment.textContent = aiComment || "";
+      comment.style.color = color;
+      area.classList.remove("hidden");
+    }
+
+    function openModal() { document.getElementById("summary-modal").classList.remove("hidden"); }
+    function closeModal() { document.getElementById("summary-modal").classList.add("hidden"); }
+
+    document.getElementById("summary-close").addEventListener("click", closeModal);
+    document.getElementById("summary-backdrop").addEventListener("click", closeModal);
+
+    // --- row comment ---
+
+    function openCommentModal() { document.getElementById("comment-modal").classList.remove("hidden"); }
+    function closeCommentModal() { document.getElementById("comment-modal").classList.add("hidden"); }
+    document.getElementById("comment-close").addEventListener("click", closeCommentModal);
+    document.getElementById("comment-backdrop").addEventListener("click", closeCommentModal);
+
+    async function onRowClick(e, row) {
+      if (!document.getElementById("loading").classList.contains("hidden")) return;
+      const data = row.getData();
+      const titleCol = col("title");
+      const title = data[titleCol] || "課題";
+      showLoading("この課題を見てるよ...");
+      try {
+        const persona = document.getElementById("persona-select").value;
+        const res = await fetch("/api/comment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ issue: data, persona }),
+        });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        document.getElementById("comment-title").textContent = title;
+        document.getElementById("comment-body").innerHTML = `
+          <div class="chat-bubble">${esc(result.comment)}</div>`;
+        openCommentModal();
+      } catch (err) {
+        document.getElementById("comment-title").textContent = title;
+        document.getElementById("comment-body").innerHTML = `<div class="text-sm text-red-500">${esc(err.message)}</div>`;
+        openCommentModal();
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function hasActiveFilter() {
+      return alertMode ||
+        getSelectedStatuses().length > 0 ||
+        document.getElementById("filter-owner").value ||
+        document.getElementById("filter-client").value;
+    }
+
+    document.getElementById("fab-btn").addEventListener("click", async () => {
+      if (!document.getElementById("loading").classList.contains("hidden")) return;
+      showLoading("分析してるよ...");
+      try {
+        const persona = document.getElementById("persona-select").value;
+        const body = { persona };
+        if (hasActiveFilter()) {
+          body.issues = table.getData();
+        }
+        const res = await fetch("/api/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        renderSummary(data.summary);
+        showScore(data.summary.score, data.summary.comment);
+        openModal();
+      } catch (err) {
+        document.getElementById("summary-content").innerHTML = `<div class="col-span-full bg-red-50 rounded-2xl p-4 text-sm text-red-500">エラーが発生しました: ${esc(err.message)}</div>`;
+        openModal();
+      } finally {
+        hideLoading();
+      }
+    });
+
+    // --- init: fetch config then data ---
+
+    async function buildPersonaSelect() {
+      const res = await fetch("/api/personas");
+      const personas = await res.json();
+      const select = document.getElementById("persona-select");
+      personas.forEach((p, i) => {
+        const opt = document.createElement("option");
+        opt.value = p.key;
+        opt.textContent = p.name;
+        if (i === 0) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function setFilterLabels() {
+      const ownerDef = colDef("owner");
+      const clientDef = colDef("client");
+      if (ownerDef) document.querySelector("#filter-owner option[value='']").textContent = ownerDef.label;
+      if (clientDef) document.querySelector("#filter-client option[value='']").textContent = clientDef.label;
+    }
+
+    function buildAlertTooltip() {
+      const rules = CFG.alerts.rules || [];
+      const tip = document.getElementById("alert-tooltip");
+      const lines = rules.map((r) => {
+        const dot = r.color ? `<span style="color:${esc(r.color)}">●</span> ` : "";
+        return `<div>${dot}${esc(r.label)}</div>`;
+      });
+      tip.innerHTML = `<div class="font-bold text-violet-700 mb-1.5">要注意の条件</div><div class="space-y-1">${lines.join("")}</div><div class="mt-1.5 text-stone-400">※ 未完了タスクのみ対象</div>`;
+    }
+
+    (async () => {
+      showLoading("スプシ読み込んでるよ...");
+      try {
+        const [cfgRes] = await Promise.all([
+          fetch("/api/config"),
+          buildPersonaSelect(),
+        ]);
+        if (!cfgRes.ok) throw new Error("設定の取得に失敗しました");
+        CFG = await cfgRes.json();
+        cacheIncomplete();
+        cacheAlertColors();
+        setFilterLabels();
+        buildStatusFilters();
+        buildSortOptions();
+        buildAlertTooltip();
+        document.getElementById("filter-status").addEventListener("change", applyFilters);
+        await loadData();
+      } catch (err) {
+        document.getElementById("issues-table").innerHTML = `<div class="bg-red-50 rounded-2xl p-6 text-center text-red-500 font-bold">${esc(err.message || "データの読み込みに失敗しました")}</div>`;
+      } finally {
+        hideLoading();
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "ai-youbou-mimamoritai",
+  "version": "1.0.0",
+  "description": "忠犬・鬼上司・関西のおばちゃん・ギャルが課題を見守るWebアプリ",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "googleapis": "^171.4.0"
+  }
+}

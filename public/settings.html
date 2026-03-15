@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設定 - AI要望みまもり隊</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; background: #faf8ff; color: #000; }
+    .inp { background: #f3edff; color: #000; border: 1px solid #e4d8f8; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; font-family: inherit; }
+    .inp:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167,139,250,0.2); }
+    .inp-sm { width: 80px; }
+    .inp-color { width: 36px; height: 32px; padding: 2px; cursor: pointer; border-radius: 8px; border: 1px solid #e4d8f8; }
+    .btn { padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: inherit; }
+    .btn-primary { background: #7c3aed; color: #fff; }
+    .btn-primary:hover { background: #6d28d9; }
+    .btn-ghost { background: transparent; color: #7c3aed; }
+    .btn-ghost:hover { background: #f3edff; }
+    .btn-danger { background: transparent; color: #ef4444; }
+    .btn-danger:hover { background: #fef2f2; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(100,60,180,0.08); padding: 20px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .col-row { border: 1px solid #f0ebff; border-radius: 12px; padding: 12px 14px; transition: all 0.15s; }
+    .col-row:hover { border-color: #d8d0f0; }
+    .col-row.dragging { opacity: 0.4; }
+    .col-row.drag-over { border-color: #a78bfa; background: #faf5ff; }
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 10px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 100; animation: toast-in 0.2s ease-out; }
+    @keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  </style>
+</head>
+<body class="min-h-screen pb-24">
+  <!-- Header -->
+  <div class="sticky top-0 z-30 bg-[#faf8ff]/90 backdrop-blur-sm max-w-4xl mx-auto flex items-center gap-3 py-4 px-4">
+    <a href="/" class="w-9 h-9 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center transition text-violet-500 hover:text-violet-700">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <h1 class="text-xl font-bold text-violet-700">設定</h1>
+  </div>
+
+  <!-- Columns -->
+  <div class="max-w-4xl mx-auto px-4 mb-6">
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-violet-700">カラム設定</h2>
+        <button id="add-col-btn" class="btn btn-ghost text-sm">+ カラム追加</button>
+      </div>
+      <div id="columns-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="max-w-4xl mx-auto px-4 mb-6">
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-violet-700">アラート設定</h2>
+        <button id="add-rule-btn" class="btn btn-ghost text-sm">+ ルール追加</button>
+      </div>
+      <div id="rules-list" class="space-y-2 mb-6"></div>
+
+      <h3 class="text-sm font-bold text-violet-600 mb-3">スコア色しきい値</h3>
+      <div id="score-colors-list" class="space-y-2 mb-3"></div>
+      <button id="add-score-btn" class="btn btn-ghost text-sm">+ しきい値追加</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-sm border-t border-violet-100 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-end gap-3">
+      <button id="reset-btn" class="btn btn-ghost">リセット</button>
+      <button id="save-btn" class="btn btn-primary px-6">保存</button>
+    </div>
+  </div>
+
+  <script>
+    let state = { columns: [], alerts: { rules: [], scoreColors: [] } };
+    let expandedCol = -1;
+    let expandedRule = -1;
+
+    function esc(str) {
+      const d = document.createElement("div");
+      d.textContent = str || "";
+      return d.innerHTML;
+    }
+
+    // ===== Columns =====
+
+    function renderColumns() {
+      const list = document.getElementById("columns-list");
+      list.innerHTML = state.columns.map((c, i) => {
+        const expanded = expandedCol === i;
+        const hasField = c.field && c.field.values;
+        return `
+        <div class="col-row" draggable="true" data-idx="${i}">
+          <div class="flex items-center gap-2 cursor-pointer" data-action="toggle-col" data-idx="${i}">
+            <span class="text-stone-300 cursor-grab" data-drag="true">⠿</span>
+            <span class="badge bg-violet-100 text-violet-600">${esc(c.role)}</span>
+            <span class="font-medium text-sm">${esc(c.label)}</span>
+            <span class="text-stone-400 text-xs">(${esc(c.name)})</span>
+            ${hasField ? '<span class="badge bg-amber-50 text-amber-600 ml-1">field</span>' : ''}
+            <span class="ml-auto text-stone-400 text-xs">${expanded ? '▲' : '▼'}</span>
+            <button class="btn btn-danger text-xs px-2 py-1" data-action="del-col" data-idx="${i}">×</button>
+          </div>
+          ${expanded ? renderColForm(c, i) : ''}
+        </div>`;
+      }).join("");
+      attachDrag();
+    }
+
+    function renderColForm(c, idx) {
+      const hasField = !!(c.field && c.field.values);
+      return `
+      <div class="mt-3 pt-3 border-t border-violet-50 space-y-3" onclick="event.stopPropagation()">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <label class="text-xs text-stone-500">role<input class="inp w-full mt-0.5" value="${esc(c.role)}" data-field="role" data-idx="${idx}"></label>
+          <label class="text-xs text-stone-500">name（スプシ列名）<input class="inp w-full mt-0.5" value="${esc(c.name)}" data-field="name" data-idx="${idx}"></label>
+          <label class="text-xs text-stone-500">label（表示名）<input class="inp w-full mt-0.5" value="${esc(c.label)}" data-field="label" data-idx="${idx}"></label>
+          <label class="text-xs text-stone-500">width<input type="number" class="inp w-full mt-0.5" value="${c.width || ''}" data-field="width" data-idx="${idx}" ${c.grow ? 'disabled' : ''}></label>
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer">
+            <input type="checkbox" class="accent-violet-500" ${c.grow ? 'checked' : ''} data-field="grow" data-idx="${idx}"> 可変幅
+          </label>
+          <label class="text-xs text-stone-500">align
+            <select class="inp ml-1" data-field="align" data-idx="${idx}">
+              <option value="" ${!c.align ? 'selected' : ''}>—</option>
+              <option value="left" ${c.align === 'left' ? 'selected' : ''}>左</option>
+              <option value="center" ${c.align === 'center' ? 'selected' : ''}>中央</option>
+              <option value="right" ${c.align === 'right' ? 'selected' : ''}>右</option>
+            </select>
+          </label>
+        </div>
+        <div class="border-t border-violet-50 pt-3">
+          <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer mb-2">
+            <input type="checkbox" class="accent-violet-500" ${hasField ? 'checked' : ''} data-action="toggle-field" data-idx="${idx}">
+            フィールド定義（プルダウン列）
+          </label>
+          ${hasField ? renderFieldEditor(c.field, idx) : ''}
+        </div>
+      </div>`;
+    }
+
+    function renderFieldEditor(field, colIdx) {
+      const vals = field.values || [];
+      const labels = field.labels || {};
+      const colors = field.colors || {};
+      const groups = field.groups || {};
+
+      let valRows = vals.map((v, vi) => `
+        <div class="flex items-center gap-2">
+          <input class="inp flex-1" value="${esc(v)}" data-fld="val" data-col="${colIdx}" data-vi="${vi}" placeholder="値">
+          <input class="inp flex-1" value="${esc(labels[v] || '')}" data-fld="lbl" data-col="${colIdx}" data-vi="${vi}" placeholder="ラベル">
+          <input type="color" class="inp-color" value="${colors[v] || '#78716c'}" data-fld="clr" data-col="${colIdx}" data-vi="${vi}">
+          <button class="btn btn-danger text-xs px-2 py-0.5" data-action="del-val" data-col="${colIdx}" data-vi="${vi}">×</button>
+        </div>`).join("");
+
+      let groupRows = Object.entries(groups).map(([gk, gv], gi) => `
+        <div class="flex items-start gap-2 mb-2">
+          <input class="inp inp-sm" value="${esc(gk)}" data-fld="gkey" data-col="${colIdx}" data-gi="${gi}" placeholder="グループ名">
+          <div class="flex flex-wrap gap-1">
+            ${vals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-violet-500" ${gv.includes(v) ? 'checked' : ''} data-fld="gmember" data-col="${colIdx}" data-gi="${gi}" data-val="${esc(v)}">${esc(labels[v] || v)}</label>`).join("")}
+          </div>
+          <button class="btn btn-danger text-xs px-2 py-0.5" data-action="del-group" data-col="${colIdx}" data-gi="${gi}">×</button>
+        </div>`).join("");
+
+      return `
+      <div class="bg-violet-50/50 rounded-xl p-3 space-y-3">
+        <div class="text-xs font-bold text-violet-600 mb-1">値一覧</div>
+        <div class="space-y-1.5">${valRows}</div>
+        <button class="btn btn-ghost text-xs" data-action="add-val" data-col="${colIdx}">+ 値を追加</button>
+
+        <div class="text-xs font-bold text-violet-600 mt-3 mb-1">グループ</div>
+        <div>${groupRows || '<div class="text-xs text-stone-400">グループなし</div>'}</div>
+        <button class="btn btn-ghost text-xs" data-action="add-group" data-col="${colIdx}">+ グループ追加</button>
+      </div>`;
+    }
+
+    // ===== Alerts =====
+
+    const RULE_TYPES = [
+      { value: "overdue", label: "期限超過" },
+      { value: "nearDeadline", label: "期限間近" },
+      { value: "statusMatch", label: "ステータス一致" },
+      { value: "fieldMatch", label: "フィールド一致" },
+    ];
+
+    function renderRules() {
+      const list = document.getElementById("rules-list");
+      list.innerHTML = state.alerts.rules.map((r, i) => {
+        const expanded = expandedRule === i;
+        const typeLbl = (RULE_TYPES.find(t => t.value === r.type) || {}).label || r.type;
+        return `
+        <div class="col-row">
+          <div class="flex items-center gap-2 cursor-pointer" data-action="toggle-rule" data-idx="${i}">
+            <span class="badge bg-violet-100 text-violet-600">${esc(typeLbl)}</span>
+            <span class="text-sm font-medium">${esc(r.label)}</span>
+            ${r.color ? `<span class="w-4 h-4 rounded-full inline-block" style="background:${esc(r.color)}"></span>` : ''}
+            <span class="ml-auto text-stone-400 text-xs">${expanded ? '▲' : '▼'}</span>
+            <button class="btn btn-danger text-xs px-2 py-1" data-action="del-rule" data-idx="${i}">×</button>
+          </div>
+          ${expanded ? renderRuleForm(r, i) : ''}
+        </div>`;
+      }).join("");
+    }
+
+    function renderRuleForm(r, idx) {
+      const cols = state.columns.filter(c => c.role);
+      const colOpts = cols.map(c => `<option value="${esc(c.role)}" ${r.column === c.role ? 'selected' : ''}>${esc(c.label)} (${esc(c.role)})</option>`).join("");
+      const fieldCol = r.column ? state.columns.find(c => c.role === r.column) : null;
+      const fieldVals = (fieldCol && fieldCol.field) ? fieldCol.field.values || [] : [];
+      const statusField = state.columns.find(c => c.role === "status");
+      const statusVals = (statusField && statusField.field) ? statusField.field.values || [] : [];
+
+      let fields = `
+        <label class="text-xs text-stone-500">タイプ
+          <select class="inp ml-1" data-rfield="type" data-idx="${idx}">
+            ${RULE_TYPES.map(t => `<option value="${t.value}" ${r.type === t.value ? 'selected' : ''}>${t.label}</option>`).join("")}
+          </select>
+        </label>
+        <label class="text-xs text-stone-500">ラベル<input class="inp w-full mt-0.5" value="${esc(r.label)}" data-rfield="label" data-idx="${idx}"></label>`;
+
+      if (r.type === "overdue" || r.type === "nearDeadline") {
+        fields += `<label class="text-xs text-stone-500">対象カラム
+          <select class="inp ml-1" data-rfield="column" data-idx="${idx}"><option value="">—</option>${colOpts}</select></label>`;
+        if (r.type === "nearDeadline") {
+          fields += `<label class="text-xs text-stone-500">日数<input type="number" class="inp inp-sm ml-1" value="${r.days || 7}" data-rfield="days" data-idx="${idx}"></label>`;
+        }
+        fields += `<label class="text-xs text-stone-500">色<input type="color" class="inp-color ml-1" value="${r.color || '#ef4444'}" data-rfield="color" data-idx="${idx}"></label>`;
+      }
+
+      if (r.type === "statusMatch") {
+        fields += `<div class="text-xs text-stone-500">対象ステータス
+          <div class="flex flex-wrap gap-1.5 mt-1">${statusVals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-violet-500" ${(r.values || []).includes(v) ? 'checked' : ''} data-rfield="sval" data-idx="${idx}" data-val="${esc(v)}">${esc(v)}</label>`).join("")}</div></div>`;
+      }
+
+      if (r.type === "fieldMatch") {
+        fields += `<label class="text-xs text-stone-500">対象カラム
+          <select class="inp ml-1" data-rfield="column" data-idx="${idx}"><option value="">—</option>${colOpts}</select></label>`;
+        if (fieldVals.length) {
+          fields += `<div class="text-xs text-stone-500">対象値
+            <div class="flex flex-wrap gap-1.5 mt-1">${fieldVals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-violet-500" ${(r.values || []).includes(v) ? 'checked' : ''} data-rfield="fval" data-idx="${idx}" data-val="${esc(v)}">${esc(v)}</label>`).join("")}</div></div>`;
+        }
+      }
+
+      return `<div class="mt-3 pt-3 border-t border-violet-50 space-y-2" onclick="event.stopPropagation()">${fields}</div>`;
+    }
+
+    function renderScoreColors() {
+      const list = document.getElementById("score-colors-list");
+      list.innerHTML = state.alerts.scoreColors.map((sc, i) => `
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-stone-500">min
+            <input type="number" class="inp inp-sm ml-1" value="${sc.min}" data-sc="min" data-idx="${i}">
+          </label>
+          <input type="color" class="inp-color" value="${sc.color}" data-sc="color" data-idx="${i}">
+          <button class="btn btn-danger text-xs px-2 py-0.5" data-action="del-sc" data-idx="${i}">×</button>
+        </div>`).join("");
+    }
+
+    // ===== Event delegation =====
+
+    document.getElementById("columns-list").addEventListener("click", (e) => {
+      const el = e.target.closest("[data-action]");
+      if (!el) return;
+      const action = el.dataset.action;
+      const idx = Number(el.dataset.idx);
+      const col = Number(el.dataset.col);
+
+      if (action === "toggle-col") { expandedCol = expandedCol === idx ? -1 : idx; renderColumns(); }
+      if (action === "del-col") { e.stopPropagation(); state.columns.splice(idx, 1); if (expandedCol === idx) expandedCol = -1; else if (expandedCol > idx) expandedCol--; renderColumns(); }
+      if (action === "toggle-field") { return; /* handled by input listener (click blocked by stopPropagation) */ }
+      if (action === "add-val") {
+        const f = state.columns[col].field;
+        const key = `new_${Date.now()}`;
+        f.values.push(key);
+        renderColumns();
+      }
+      if (action === "del-val") {
+        const f = state.columns[col].field;
+        const vi = Number(el.dataset.vi);
+        const removed = f.values[vi];
+        f.values.splice(vi, 1);
+        delete f.labels[removed];
+        delete f.colors[removed];
+        for (const gk of Object.keys(f.groups || {})) {
+          f.groups[gk] = f.groups[gk].filter(v => v !== removed);
+        }
+        renderColumns();
+      }
+      if (action === "add-group") {
+        const f = state.columns[col].field;
+        if (!f.groups) f.groups = {};
+        f.groups[`group_${Date.now()}`] = [];
+        renderColumns();
+      }
+      if (action === "del-group") {
+        const f = state.columns[col].field;
+        const keys = Object.keys(f.groups);
+        const gi = Number(el.dataset.gi);
+        delete f.groups[keys[gi]];
+        renderColumns();
+      }
+    });
+
+    document.getElementById("columns-list").addEventListener("input", (e) => {
+      const el = e.target;
+      const idx = Number(el.dataset.idx);
+      const col = Number(el.dataset.col);
+
+      if (el.dataset.action === "toggle-field") {
+        const c = state.columns[idx];
+        if (c.field) delete c.field;
+        else c.field = { values: [], labels: {}, colors: {}, groups: {} };
+        renderColumns();
+        return;
+      }
+
+      if (el.dataset.field) {
+        const c = state.columns[idx];
+        const f = el.dataset.field;
+        if (f === "grow") { c.grow = el.checked; if (el.checked) delete c.width; renderColumns(); }
+        else if (f === "width") { c.width = Number(el.value) || undefined; }
+        else if (f === "align") { c.align = el.value || undefined; renderColumns(); }
+        else {
+          c[f] = el.value;
+          const row = el.closest(".col-row");
+          if (row) {
+            if (f === "role") { const badge = row.querySelector(".badge"); if (badge) badge.textContent = el.value; }
+            if (f === "label") { const lbl = row.querySelector(".font-medium"); if (lbl) lbl.textContent = el.value; }
+            if (f === "name") { const nm = row.querySelector(".text-stone-400.text-xs"); if (nm) nm.textContent = `(${el.value})`; }
+          }
+        }
+      }
+
+      if (el.dataset.fld === "val") {
+        const f = state.columns[col].field;
+        const vi = Number(el.dataset.vi);
+        const oldVal = f.values[vi];
+        const newVal = el.value;
+        f.values[vi] = newVal;
+        if (f.labels[oldVal] !== undefined) { f.labels[newVal] = f.labels[oldVal]; delete f.labels[oldVal]; }
+        if (f.colors[oldVal] !== undefined) { f.colors[newVal] = f.colors[oldVal]; delete f.colors[oldVal]; }
+        for (const gk of Object.keys(f.groups || {})) {
+          f.groups[gk] = f.groups[gk].map(v => v === oldVal ? newVal : v);
+        }
+      }
+      if (el.dataset.fld === "lbl") {
+        const f = state.columns[col].field;
+        f.labels[f.values[Number(el.dataset.vi)]] = el.value;
+      }
+      if (el.dataset.fld === "clr") {
+        const f = state.columns[col].field;
+        f.colors[f.values[Number(el.dataset.vi)]] = el.value;
+      }
+      if (el.dataset.fld === "gkey") {
+        const f = state.columns[col].field;
+        const keys = Object.keys(f.groups);
+        const gi = Number(el.dataset.gi);
+        const oldKey = keys[gi];
+        const newKey = el.value;
+        if (oldKey !== newKey) {
+          const newGroups = {};
+          keys.forEach((k, i) => { newGroups[i === gi ? newKey : k] = f.groups[k]; });
+          f.groups = newGroups;
+        }
+      }
+      if (el.dataset.fld === "gmember") {
+        const f = state.columns[col].field;
+        const keys = Object.keys(f.groups);
+        const gi = Number(el.dataset.gi);
+        const val = el.dataset.val;
+        const arr = f.groups[keys[gi]];
+        if (el.checked) { if (!arr.includes(val)) arr.push(val); }
+        else { f.groups[keys[gi]] = arr.filter(v => v !== val); }
+      }
+    });
+
+    // Alerts events
+    document.getElementById("rules-list").addEventListener("click", (e) => {
+      const el = e.target.closest("[data-action]");
+      if (!el) return;
+      const idx = Number(el.dataset.idx);
+      if (el.dataset.action === "toggle-rule") { expandedRule = expandedRule === idx ? -1 : idx; renderRules(); }
+      if (el.dataset.action === "del-rule") { e.stopPropagation(); state.alerts.rules.splice(idx, 1); if (expandedRule === idx) expandedRule = -1; else if (expandedRule > idx) expandedRule--; renderRules(); }
+    });
+
+    document.getElementById("rules-list").addEventListener("input", (e) => {
+      const el = e.target;
+      if (!el.dataset.rfield) return;
+      const idx = Number(el.dataset.idx);
+      const r = state.alerts.rules[idx];
+      const f = el.dataset.rfield;
+
+      if (f === "type") { r.type = el.value; delete r.column; delete r.values; delete r.days; delete r.color; renderRules(); return; }
+      if (f === "label") r.label = el.value;
+      if (f === "column") { r.column = el.value; if (r.type === "fieldMatch") r.values = []; renderRules(); return; }
+      if (f === "days") r.days = Number(el.value) || 7;
+      if (f === "color") r.color = el.value;
+      if (f === "sval" || f === "fval") {
+        if (!r.values) r.values = [];
+        const val = el.dataset.val;
+        if (el.checked) { if (!r.values.includes(val)) r.values.push(val); }
+        else { r.values = r.values.filter(v => v !== val); }
+      }
+    });
+
+    // Score colors events
+    document.getElementById("score-colors-list").addEventListener("input", (e) => {
+      const el = e.target;
+      if (!el.dataset.sc) return;
+      const idx = Number(el.dataset.idx);
+      if (el.dataset.sc === "min") state.alerts.scoreColors[idx].min = Number(el.value) || 0;
+      if (el.dataset.sc === "color") state.alerts.scoreColors[idx].color = el.value;
+    });
+    document.getElementById("score-colors-list").addEventListener("click", (e) => {
+      const el = e.target.closest("[data-action='del-sc']");
+      if (!el) return;
+      state.alerts.scoreColors.splice(Number(el.dataset.idx), 1);
+      renderScoreColors();
+    });
+
+    // Add buttons
+    document.getElementById("add-col-btn").addEventListener("click", () => {
+      state.columns.push({ role: "", name: "", label: "", width: 120 });
+      expandedCol = state.columns.length - 1;
+      renderColumns();
+    });
+    document.getElementById("add-rule-btn").addEventListener("click", () => {
+      state.alerts.rules.push({ type: "overdue", column: "dueDate", label: "新しいルール", color: "#ef4444" });
+      expandedRule = state.alerts.rules.length - 1;
+      renderRules();
+    });
+    document.getElementById("add-score-btn").addEventListener("click", () => {
+      state.alerts.scoreColors.push({ min: 0, color: "#78716c" });
+      renderScoreColors();
+    });
+
+    // ===== Drag and drop =====
+
+    let dragIdx = null;
+    function attachDrag() {
+      document.querySelectorAll(".col-row[draggable]").forEach(el => {
+        el.addEventListener("dragstart", (e) => {
+          dragIdx = Number(el.dataset.idx);
+          el.classList.add("dragging");
+          e.dataTransfer.effectAllowed = "move";
+        });
+        el.addEventListener("dragend", () => { el.classList.remove("dragging"); dragIdx = null; document.querySelectorAll(".drag-over").forEach(x => x.classList.remove("drag-over")); });
+        el.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; el.classList.add("drag-over"); });
+        el.addEventListener("dragleave", () => { el.classList.remove("drag-over"); });
+        el.addEventListener("drop", (e) => {
+          e.preventDefault();
+          el.classList.remove("drag-over");
+          const dropIdx = Number(el.dataset.idx);
+          if (dragIdx === null || dragIdx === dropIdx) return;
+          const item = state.columns.splice(dragIdx, 1)[0];
+          state.columns.splice(dropIdx, 0, item);
+          expandedCol = -1;
+          renderColumns();
+        });
+      });
+    }
+
+    // ===== Save / Reset =====
+
+    function showToast(msg, ok) {
+      const t = document.createElement("div");
+      t.className = `toast ${ok ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    document.getElementById("save-btn").addEventListener("click", async () => {
+      // Sort scoreColors descending by min
+      state.alerts.scoreColors.sort((a, b) => b.min - a.min);
+      try {
+        const res = await fetch("/api/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ columns: state.columns, alerts: state.alerts }),
+        });
+        const data = await res.json();
+        if (data.ok) showToast("保存しました", true);
+        else showToast(data.error || "保存に失敗しました", false);
+      } catch (err) {
+        showToast("保存に失敗しました", false);
+      }
+    });
+
+    document.getElementById("reset-btn").addEventListener("click", () => { loadConfig(); });
+
+    // ===== Init =====
+
+    async function loadConfig() {
+      const res = await fetch("/api/config/full");
+      const data = await res.json();
+      state.columns = JSON.parse(JSON.stringify(data.columns));
+      state.alerts = JSON.parse(JSON.stringify(data.alerts));
+      expandedCol = -1;
+      expandedRule = -1;
+      renderColumns();
+      renderRules();
+      renderScoreColors();
+    }
+
+    loadConfig();
+  </script>
+</body>
+</html>
