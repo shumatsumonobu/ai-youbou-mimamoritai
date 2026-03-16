@@ -29,95 +29,102 @@
   <link href="https://unpkg.com/tabulator-tables@6/dist/css/tabulator_simple.min.css" rel="stylesheet">
   <script src="https://unpkg.com/tabulator-tables@6/dist/js/tabulator.min.js"></script>
   <style>
-    body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; background: #faf8ff; color: #000; }
-    .tabulator { border: none; border-radius: 16px; background: #fff; font-size: 14px; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; overflow: hidden; box-shadow: 0 1px 4px rgba(100,60,180,0.08); }
-    .tabulator .tabulator-header { background: #f3edff; color: #5b4a7a; border-bottom: 2px solid #e4d8f8; font-weight: 500; }
-    .tabulator .tabulator-header .tabulator-col { background: #f3edff; border-right: 1px solid #e4d8f8; }
-    .tabulator .tabulator-header .tabulator-col:hover { background: #f3edff; }
-    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row { background: #fff; color: #000; border-bottom: 1px solid #f5f0ff; cursor: pointer; }
-    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover { background: #ede5ff; }
-    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even { background: #fdfbff; }
-    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover { background: #ede5ff; }
+    body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; background: #0a0a0a; color: #fff; }
+    .tabulator { border: none; border-radius: 16px; background: #1a1a2e; font-size: 14px; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; overflow: hidden; box-shadow: 0 0 20px rgba(255,0,100,0.15), 0 0 40px rgba(0,200,255,0.1); }
+    .tabulator .tabulator-header { background: linear-gradient(90deg, #ff0066, #6600ff, #00ccff); color: #fff; border-bottom: 2px solid #ff0066; font-weight: 700; }
+    .tabulator .tabulator-header .tabulator-col { background: transparent; border-right: 1px solid rgba(255,255,255,0.15); }
+    .tabulator .tabulator-header .tabulator-col:hover { background: rgba(255,255,255,0.1); }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row { background: #1a1a2e; color: #e0e0e0; border-bottom: 1px solid #2a2a4a; cursor: pointer; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover { background: #2a1a4e; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even { background: #16162a; }
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover { background: #2a1a4e; }
     .tabulator .tabulator-cell { white-space: normal; word-break: break-all; }
 
     .fab-container { position: fixed; bottom: 32px; right: 32px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
-    .fab { height: 88px; border-radius: 44px; background: linear-gradient(135deg, #a78bfa, #7c3aed); color: #fff; border: none; cursor: pointer; box-shadow: 0 6px 24px rgba(124,58,237,0.4); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 36px; font-size: 20px; font-weight: 700; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; transition: all 0.2s; letter-spacing: 0.05em; }
-    .fab:hover { transform: scale(1.05); box-shadow: 0 8px 32px rgba(124,58,237,0.5); }
+    .fab { height: 88px; border-radius: 44px; background: linear-gradient(135deg, #ff0066, #ff6600, #ffcc00); color: #fff; border: none; cursor: pointer; box-shadow: 0 6px 30px rgba(255,0,102,0.5), 0 0 60px rgba(255,102,0,0.3); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 36px; font-size: 20px; font-weight: 700; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; transition: all 0.2s; letter-spacing: 0.05em; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .fab:hover { transform: scale(1.05); box-shadow: 0 8px 40px rgba(255,0,102,0.6), 0 0 80px rgba(255,102,0,0.4); }
     .fab:active { transform: scale(0.97); }
-    .fab-ring { position: absolute; inset: -8px; border-radius: 52px; border: 2px solid rgba(167,139,250,0.4); animation: fab-pulse 2s ease-in-out infinite; pointer-events: none; }
-    @keyframes fab-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0; transform: scale(1.15); } }
+    .fab-ring { position: absolute; inset: -8px; border-radius: 52px; border: 2px solid rgba(255,0,102,0.5); animation: fab-pulse 2s ease-in-out infinite; pointer-events: none; }
+    @keyframes fab-pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0; transform: scale(1.15); } }
     @keyframes bounce-in { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
     .summary-card { animation: bounce-in 0.3s ease-out; }
-    .chat-bubble { background: #f3edff; border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 14px; line-height: 1.7; color: #3d2e5c; font-weight: 500; position: relative; }
+    .chat-bubble { background: linear-gradient(135deg, #1a1a2e, #2a1a4e); border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 14px; line-height: 1.7; color: #e0e0ff; font-weight: 500; position: relative; border: 1px solid rgba(255,0,102,0.2); }
     @keyframes modal-in { 0% { opacity: 0; transform: scale(0.9) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
     .animate-modal-in { animation: modal-in 0.25s ease-out; }
+    @keyframes bg-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .neon-text { background: linear-gradient(90deg, #ff0066, #00ccff, #ffcc00, #00ff66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 300% 300%; animation: bg-shift 4s ease infinite; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #1a1a2e; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff0066, #6600ff); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #ff3388, #00ccff); }
+    * { scrollbar-width: thin; scrollbar-color: #ff0066 #1a1a2e; }
   </style>
 </head>
 <body class="min-h-screen p-4 pb-28">
   <!-- Header -->
-  <div class="sticky top-0 z-30 bg-[#faf8ff]/90 backdrop-blur-sm max-w-7xl mx-auto mb-5 flex items-center justify-between py-3">
-    <h1 class="text-xl font-bold text-violet-700 tracking-wide">AI要望みまもり隊</h1>
+  <div class="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-sm max-w-7xl mx-auto mb-5 flex items-center justify-between py-3">
+    <h1 class="text-2xl font-bold neon-text tracking-wide">AI要望みまもり隊</h1>
     <div class="flex items-center gap-3">
-    <a href="/settings.html" class="w-9 h-9 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center transition text-violet-500 hover:text-violet-700" title="設定">
+    <a href="/settings.html" class="w-9 h-9 rounded-full bg-[#2a1a4e] hover:bg-[#3a2a5e] flex items-center justify-center transition text-[#ff0066] hover:text-[#ff3388]" title="設定">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </a>
-    <select id="persona-select" class="bg-white text-violet-700 font-bold text-xl rounded-2xl px-6 py-4 border-2 border-violet-200 shadow-sm cursor-pointer hover:border-violet-400 transition">
+    <select id="persona-select" class="bg-[#1a1a2e] text-[#00ccff] font-bold text-xl rounded-2xl px-6 py-4 border-2 border-[#ff0066] shadow-sm cursor-pointer hover:border-[#ff3388] transition" style="box-shadow: 0 0 15px rgba(255,0,102,0.3);">
     </select>
     </div>
   </div>
 
   <!-- Filters -->
   <div class="max-w-7xl mx-auto mb-4">
-    <div class="bg-white rounded-2xl shadow-sm px-5 py-4 flex flex-col gap-3">
+    <div class="bg-[#1a1a2e] rounded-2xl shadow-sm px-5 py-4 flex flex-col gap-3 border border-[#2a2a4a]">
       <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <label class="flex items-center gap-1.5 cursor-pointer border-r border-violet-100 pr-5">
-          <input type="checkbox" id="filter-alert" class="w-4 h-4 accent-violet-500 rounded">
-          <span class="text-violet-700 text-sm font-medium">要注意のみ</span>
+        <label class="flex items-center gap-1.5 cursor-pointer border-r border-[#2a2a4a] pr-5">
+          <input type="checkbox" id="filter-alert" class="w-4 h-4 accent-[#ff0066] rounded">
+          <span class="text-[#ff0066] text-sm font-medium">要注意のみ</span>
           <span id="alert-info" class="relative group ml-1">
-            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-500 hover:bg-violet-200 hover:text-violet-700 transition cursor-help text-xs font-bold leading-none">?</span>
-            <div id="alert-tooltip" class="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-xl shadow-lg border border-violet-100 p-3 w-56 z-50 text-xs text-stone-600 leading-relaxed"></div>
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#2a1a4e] text-[#ff0066] hover:bg-[#3a2a5e] transition cursor-help text-xs font-bold leading-none">?</span>
+            <div id="alert-tooltip" class="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-[#1a1a2e] rounded-xl shadow-lg border border-[#ff0066] p-3 w-56 z-50 text-xs text-gray-300 leading-relaxed"></div>
           </span>
         </label>
         <div id="filter-status" class="flex flex-wrap items-center gap-x-3 gap-y-1"></div>
       </div>
       <div class="flex flex-wrap items-center gap-3">
-        <select id="filter-owner" class="bg-base-100 text-stone-600 rounded-lg px-3 py-1.5 text-sm border border-violet-100">
+        <select id="filter-owner" class="bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a]">
           <option value=""></option>
         </select>
-        <select id="filter-client" class="bg-base-100 text-stone-600 rounded-lg px-3 py-1.5 text-sm border border-violet-100 max-w-[200px]">
+        <select id="filter-client" class="bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a] max-w-[200px]">
           <option value=""></option>
         </select>
-        <select id="sort-select" class="bg-base-100 text-stone-600 rounded-lg px-3 py-1.5 text-sm border border-violet-100">
+        <select id="sort-select" class="bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a]">
           <option value="">並び替え</option>
         </select>
-        <button id="clear-btn" class="text-stone-400 hover:text-violet-500 text-sm transition">クリア</button>
-        <span id="count-label" class="text-stone-400 text-sm ml-auto"></span>
+        <button id="clear-btn" class="text-gray-500 hover:text-[#00ccff] text-sm transition">クリア</button>
+        <span id="count-label" class="text-gray-500 text-sm ml-auto"></span>
       </div>
     </div>
   </div>
 
   <!-- Table -->
   <div class="max-w-7xl mx-auto mb-6">
-    <div class="text-base text-violet-500 font-medium mb-2 px-1">行をクリックするとAIがコメントしてくれるよ</div>
+    <div class="text-base text-[#00ccff] font-medium mb-2 px-1">行をクリックするとAIがコメントしてくれるよ</div>
     <div id="issues-table"></div>
   </div>
 
   <!-- AI Summary Modal -->
   <div id="summary-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-    <div id="summary-backdrop" class="absolute inset-0 bg-black/25 backdrop-blur-sm"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-[90vw] max-w-4xl max-h-[80vh] flex flex-col overflow-hidden animate-modal-in">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-violet-50">
-        <h2 class="text-lg font-bold text-violet-700">がんばって読んできた！</h2>
-        <button id="summary-close" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-violet-100 flex items-center justify-center transition text-stone-400 hover:text-violet-500">
+    <div id="summary-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-[#1a1a2e] rounded-3xl shadow-2xl w-[90vw] max-w-4xl max-h-[80vh] flex flex-col overflow-hidden animate-modal-in" style="box-shadow: 0 0 40px rgba(255,0,102,0.2), 0 0 80px rgba(0,200,255,0.1);">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#2a2a4a]">
+        <h2 class="text-lg font-bold neon-text">がんばって読んできた！</h2>
+        <button id="summary-close" class="w-9 h-9 rounded-full bg-[#2a2a4a] hover:bg-[#3a2a5e] flex items-center justify-center transition text-gray-400 hover:text-[#ff0066]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div id="score-area" class="hidden px-6 py-5 border-b border-violet-50 flex items-center gap-5">
+      <div id="score-area" class="hidden px-6 py-5 border-b border-[#2a2a4a] flex items-center gap-5">
         <div class="text-center">
-          <div class="text-xs text-stone-400 mb-1">いまの調子</div>
+          <div class="text-xs text-gray-500 mb-1">いまの調子</div>
           <div class="flex items-end gap-1">
             <span id="score-value" class="text-5xl font-bold leading-none"></span>
-            <span class="text-sm text-stone-400 pb-1">/ 100</span>
+            <span class="text-sm text-gray-500 pb-1">/ 100</span>
           </div>
         </div>
         <div id="score-comment" class="text-base font-bold"></div>
@@ -137,24 +144,24 @@
 
   <!-- Row Comment Modal -->
   <div id="comment-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-    <div id="comment-backdrop" class="absolute inset-0 bg-black/25 backdrop-blur-sm"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-[90vw] max-w-md p-6 animate-modal-in">
-      <button id="comment-close" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-stone-100 hover:bg-violet-100 flex items-center justify-center transition text-stone-400 hover:text-violet-500">
+    <div id="comment-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-[#1a1a2e] rounded-3xl shadow-2xl w-[90vw] max-w-md p-6 animate-modal-in" style="box-shadow: 0 0 30px rgba(0,200,255,0.2), 0 0 60px rgba(255,0,102,0.1);">
+      <button id="comment-close" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#2a2a4a] hover:bg-[#3a2a5e] flex items-center justify-center transition text-gray-400 hover:text-[#ff0066]">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <div id="comment-title" class="text-sm font-bold text-violet-700 mb-3 pr-8"></div>
+      <div id="comment-title" class="text-sm font-bold text-[#00ccff] mb-3 pr-8"></div>
       <div id="comment-body" class="space-y-2"></div>
     </div>
   </div>
 
   <!-- Loading -->
-  <div id="loading" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl p-8 text-center shadow-xl">
+  <div id="loading" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-[#1a1a2e] rounded-3xl p-8 text-center shadow-xl" style="box-shadow: 0 0 40px rgba(255,0,102,0.3);">
       <div class="relative w-16 h-16 mx-auto mb-4">
-        <div class="absolute inset-0 rounded-full border-4 border-violet-100"></div>
-        <div class="absolute inset-0 rounded-full border-4 border-violet-400 border-t-transparent animate-spin"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-[#2a2a4a]"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-[#ff0066] border-t-transparent animate-spin"></div>
       </div>
-      <p id="loading-text" class="text-violet-600 text-base font-bold"></p>
+      <p id="loading-text" class="text-[#00ccff] text-base font-bold"></p>
     </div>
   </div>
 

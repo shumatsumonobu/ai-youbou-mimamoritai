@@ -9,42 +9,49 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; background: #faf8ff; color: #000; }
-    .inp { background: #f3edff; color: #000; border: 1px solid #e4d8f8; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; font-family: inherit; }
-    .inp:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167,139,250,0.2); }
+    body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; background: #0a0a0a; color: #e0e0e0; }
+    .inp { background: #1a1a2e; color: #e0e0e0; border: 1px solid #2a2a4a; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; font-family: inherit; }
+    .inp:focus { border-color: #ff0066; box-shadow: 0 0 0 2px rgba(255,0,102,0.2); }
     .inp-sm { width: 80px; }
-    .inp-color { width: 36px; height: 32px; padding: 2px; cursor: pointer; border-radius: 8px; border: 1px solid #e4d8f8; }
+    .inp-color { width: 36px; height: 32px; padding: 2px; cursor: pointer; border-radius: 8px; border: 1px solid #2a2a4a; }
     .btn { padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: inherit; }
-    .btn-primary { background: #7c3aed; color: #fff; }
-    .btn-primary:hover { background: #6d28d9; }
-    .btn-ghost { background: transparent; color: #7c3aed; }
-    .btn-ghost:hover { background: #f3edff; }
-    .btn-danger { background: transparent; color: #ef4444; }
-    .btn-danger:hover { background: #fef2f2; }
-    .card { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(100,60,180,0.08); padding: 20px; }
+    .btn-primary { background: linear-gradient(135deg, #ff0066, #ff6600); color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .btn-primary:hover { box-shadow: 0 0 20px rgba(255,0,102,0.4); }
+    .btn-ghost { background: transparent; color: #00ccff; }
+    .btn-ghost:hover { background: #1a1a2e; }
+    .btn-danger { background: transparent; color: #ff0066; }
+    .btn-danger:hover { background: rgba(255,0,102,0.1); }
+    .card { background: #1a1a2e; border-radius: 16px; box-shadow: 0 0 20px rgba(255,0,100,0.08), 0 0 40px rgba(0,200,255,0.05); padding: 20px; border: 1px solid #2a2a4a; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-    .col-row { border: 1px solid #f0ebff; border-radius: 12px; padding: 12px 14px; transition: all 0.15s; }
-    .col-row:hover { border-color: #d8d0f0; }
+    .col-row { border: 1px solid #2a2a4a; border-radius: 12px; padding: 12px 14px; transition: all 0.15s; }
+    .col-row:hover { border-color: #ff0066; box-shadow: 0 0 10px rgba(255,0,102,0.1); }
     .col-row.dragging { opacity: 0.4; }
-    .col-row.drag-over { border-color: #a78bfa; background: #faf5ff; }
+    .col-row.drag-over { border-color: #00ccff; background: rgba(0,200,255,0.05); }
     .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 10px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 100; animation: toast-in 0.2s ease-out; }
     @keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes bg-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .neon-text { background: linear-gradient(90deg, #ff0066, #00ccff, #ffcc00, #00ff66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 300% 300%; animation: bg-shift 4s ease infinite; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #1a1a2e; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff0066, #6600ff); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #ff3388, #00ccff); }
+    * { scrollbar-width: thin; scrollbar-color: #ff0066 #1a1a2e; }
   </style>
 </head>
 <body class="min-h-screen pb-24">
   <!-- Header -->
-  <div class="sticky top-0 z-30 bg-[#faf8ff]/90 backdrop-blur-sm max-w-4xl mx-auto flex items-center gap-3 py-4 px-4">
-    <a href="/" class="w-9 h-9 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center transition text-violet-500 hover:text-violet-700">
+  <div class="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-sm max-w-4xl mx-auto flex items-center gap-3 py-4 px-4">
+    <a href="/" class="w-9 h-9 rounded-full bg-[#2a1a4e] hover:bg-[#3a2a5e] flex items-center justify-center transition text-[#ff0066] hover:text-[#ff3388]">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
-    <h1 class="text-xl font-bold text-violet-700">設定</h1>
+    <h1 class="text-xl font-bold neon-text">設定</h1>
   </div>
 
   <!-- Columns -->
   <div class="max-w-4xl mx-auto px-4 mb-6">
     <div class="card">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-bold text-violet-700">カラム設定</h2>
+        <h2 class="text-base font-bold text-[#00ccff]">カラム設定</h2>
         <button id="add-col-btn" class="btn btn-ghost text-sm">+ カラム追加</button>
       </div>
       <div id="columns-list" class="space-y-2"></div>
@@ -55,19 +62,19 @@
   <div class="max-w-4xl mx-auto px-4 mb-6">
     <div class="card">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-bold text-violet-700">アラート設定</h2>
+        <h2 class="text-base font-bold text-[#00ccff]">アラート設定</h2>
         <button id="add-rule-btn" class="btn btn-ghost text-sm">+ ルール追加</button>
       </div>
       <div id="rules-list" class="space-y-2 mb-6"></div>
 
-      <h3 class="text-sm font-bold text-violet-600 mb-3">スコア色しきい値</h3>
+      <h3 class="text-sm font-bold text-[#ffcc00] mb-3">スコア色しきい値</h3>
       <div id="score-colors-list" class="space-y-2 mb-3"></div>
       <button id="add-score-btn" class="btn btn-ghost text-sm">+ しきい値追加</button>
     </div>
   </div>
 
   <!-- Footer -->
-  <div class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-sm border-t border-violet-100 z-40">
+  <div class="fixed bottom-0 inset-x-0 bg-[#0a0a0a]/90 backdrop-blur-sm border-t border-[#2a2a4a] z-40">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-end gap-3">
       <button id="reset-btn" class="btn btn-ghost">リセット</button>
       <button id="save-btn" class="btn btn-primary px-6">保存</button>
@@ -95,12 +102,12 @@
         return `
         <div class="col-row" draggable="true" data-idx="${i}">
           <div class="flex items-center gap-2 cursor-pointer" data-action="toggle-col" data-idx="${i}">
-            <span class="text-stone-300 cursor-grab" data-drag="true">⠿</span>
-            <span class="badge bg-violet-100 text-violet-600">${esc(c.role)}</span>
+            <span class="text-gray-600 cursor-grab" data-drag="true">⠿</span>
+            <span class="badge bg-[#2a1a4e] text-[#00ccff]">${esc(c.role)}</span>
             <span class="font-medium text-sm">${esc(c.label)}</span>
-            <span class="text-stone-400 text-xs">(${esc(c.name)})</span>
-            ${hasField ? '<span class="badge bg-amber-50 text-amber-600 ml-1">field</span>' : ''}
-            <span class="ml-auto text-stone-400 text-xs">${expanded ? '▲' : '▼'}</span>
+            <span class="text-gray-500 text-xs">(${esc(c.name)})</span>
+            ${hasField ? '<span class="badge bg-[#332200] text-[#ffcc00] ml-1">field</span>' : ''}
+            <span class="ml-auto text-gray-500 text-xs">${expanded ? '▲' : '▼'}</span>
             <button class="btn btn-danger text-xs px-2 py-1" data-action="del-col" data-idx="${i}">×</button>
           </div>
           ${expanded ? renderColForm(c, i) : ''}
@@ -112,18 +119,18 @@
     function renderColForm(c, idx) {
       const hasField = !!(c.field && c.field.values);
       return `
-      <div class="mt-3 pt-3 border-t border-violet-50 space-y-3" onclick="event.stopPropagation()">
+      <div class="mt-3 pt-3 border-t border-[#2a2a4a] space-y-3" onclick="event.stopPropagation()">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <label class="text-xs text-stone-500">role<input class="inp w-full mt-0.5" value="${esc(c.role)}" data-field="role" data-idx="${idx}"></label>
-          <label class="text-xs text-stone-500">name（スプシ列名）<input class="inp w-full mt-0.5" value="${esc(c.name)}" data-field="name" data-idx="${idx}"></label>
-          <label class="text-xs text-stone-500">label（表示名）<input class="inp w-full mt-0.5" value="${esc(c.label)}" data-field="label" data-idx="${idx}"></label>
-          <label class="text-xs text-stone-500">width<input type="number" class="inp w-full mt-0.5" value="${c.width || ''}" data-field="width" data-idx="${idx}" ${c.grow ? 'disabled' : ''}></label>
+          <label class="text-xs text-gray-400">role<input class="inp w-full mt-0.5" value="${esc(c.role)}" data-field="role" data-idx="${idx}"></label>
+          <label class="text-xs text-gray-400">name（スプシ列名）<input class="inp w-full mt-0.5" value="${esc(c.name)}" data-field="name" data-idx="${idx}"></label>
+          <label class="text-xs text-gray-400">label（表示名）<input class="inp w-full mt-0.5" value="${esc(c.label)}" data-field="label" data-idx="${idx}"></label>
+          <label class="text-xs text-gray-400">width<input type="number" class="inp w-full mt-0.5" value="${c.width || ''}" data-field="width" data-idx="${idx}" ${c.grow ? 'disabled' : ''}></label>
         </div>
         <div class="flex items-center gap-4">
-          <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer">
-            <input type="checkbox" class="accent-violet-500" ${c.grow ? 'checked' : ''} data-field="grow" data-idx="${idx}"> 可変幅
+          <label class="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer">
+            <input type="checkbox" class="accent-[#ff0066]" ${c.grow ? 'checked' : ''} data-field="grow" data-idx="${idx}"> 可変幅
           </label>
-          <label class="text-xs text-stone-500">align
+          <label class="text-xs text-gray-400">align
             <select class="inp ml-1" data-field="align" data-idx="${idx}">
               <option value="" ${!c.align ? 'selected' : ''}>—</option>
               <option value="left" ${c.align === 'left' ? 'selected' : ''}>左</option>
@@ -132,9 +139,9 @@
             </select>
           </label>
         </div>
-        <div class="border-t border-violet-50 pt-3">
-          <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer mb-2">
-            <input type="checkbox" class="accent-violet-500" ${hasField ? 'checked' : ''} data-action="toggle-field" data-idx="${idx}">
+        <div class="border-t border-[#2a2a4a] pt-3">
+          <label class="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer mb-2">
+            <input type="checkbox" class="accent-[#ff0066]" ${hasField ? 'checked' : ''} data-action="toggle-field" data-idx="${idx}">
             フィールド定義（プルダウン列）
           </label>
           ${hasField ? renderFieldEditor(c.field, idx) : ''}
@@ -160,19 +167,19 @@
         <div class="flex items-start gap-2 mb-2">
           <input class="inp inp-sm" value="${esc(gk)}" data-fld="gkey" data-col="${colIdx}" data-gi="${gi}" placeholder="グループ名">
           <div class="flex flex-wrap gap-1">
-            ${vals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-violet-500" ${gv.includes(v) ? 'checked' : ''} data-fld="gmember" data-col="${colIdx}" data-gi="${gi}" data-val="${esc(v)}">${esc(labels[v] || v)}</label>`).join("")}
+            ${vals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-[#ff0066]" ${gv.includes(v) ? 'checked' : ''} data-fld="gmember" data-col="${colIdx}" data-gi="${gi}" data-val="${esc(v)}">${esc(labels[v] || v)}</label>`).join("")}
           </div>
           <button class="btn btn-danger text-xs px-2 py-0.5" data-action="del-group" data-col="${colIdx}" data-gi="${gi}">×</button>
         </div>`).join("");
 
       return `
-      <div class="bg-violet-50/50 rounded-xl p-3 space-y-3">
-        <div class="text-xs font-bold text-violet-600 mb-1">値一覧</div>
+      <div class="bg-[#0a0a0a]/50 rounded-xl p-3 space-y-3">
+        <div class="text-xs font-bold text-[#00ccff] mb-1">値一覧</div>
         <div class="space-y-1.5">${valRows}</div>
         <button class="btn btn-ghost text-xs" data-action="add-val" data-col="${colIdx}">+ 値を追加</button>
 
-        <div class="text-xs font-bold text-violet-600 mt-3 mb-1">グループ</div>
-        <div>${groupRows || '<div class="text-xs text-stone-400">グループなし</div>'}</div>
+        <div class="text-xs font-bold text-[#00ccff] mt-3 mb-1">グループ</div>
+        <div>${groupRows || '<div class="text-xs text-gray-500">グループなし</div>'}</div>
         <button class="btn btn-ghost text-xs" data-action="add-group" data-col="${colIdx}">+ グループ追加</button>
       </div>`;
     }
@@ -194,10 +201,10 @@
         return `
         <div class="col-row">
           <div class="flex items-center gap-2 cursor-pointer" data-action="toggle-rule" data-idx="${i}">
-            <span class="badge bg-violet-100 text-violet-600">${esc(typeLbl)}</span>
+            <span class="badge bg-[#2a1a4e] text-[#00ccff]">${esc(typeLbl)}</span>
             <span class="text-sm font-medium">${esc(r.label)}</span>
             ${r.color ? `<span class="w-4 h-4 rounded-full inline-block" style="background:${esc(r.color)}"></span>` : ''}
-            <span class="ml-auto text-stone-400 text-xs">${expanded ? '▲' : '▼'}</span>
+            <span class="ml-auto text-gray-500 text-xs">${expanded ? '▲' : '▼'}</span>
             <button class="btn btn-danger text-xs px-2 py-1" data-action="del-rule" data-idx="${i}">×</button>
           </div>
           ${expanded ? renderRuleForm(r, i) : ''}
@@ -214,44 +221,44 @@
       const statusVals = (statusField && statusField.field) ? statusField.field.values || [] : [];
 
       let fields = `
-        <label class="text-xs text-stone-500">タイプ
+        <label class="text-xs text-gray-400">タイプ
           <select class="inp ml-1" data-rfield="type" data-idx="${idx}">
             ${RULE_TYPES.map(t => `<option value="${t.value}" ${r.type === t.value ? 'selected' : ''}>${t.label}</option>`).join("")}
           </select>
         </label>
-        <label class="text-xs text-stone-500">ラベル<input class="inp w-full mt-0.5" value="${esc(r.label)}" data-rfield="label" data-idx="${idx}"></label>`;
+        <label class="text-xs text-gray-400">ラベル<input class="inp w-full mt-0.5" value="${esc(r.label)}" data-rfield="label" data-idx="${idx}"></label>`;
 
       if (r.type === "overdue" || r.type === "nearDeadline") {
-        fields += `<label class="text-xs text-stone-500">対象カラム
+        fields += `<label class="text-xs text-gray-400">対象カラム
           <select class="inp ml-1" data-rfield="column" data-idx="${idx}"><option value="">—</option>${colOpts}</select></label>`;
         if (r.type === "nearDeadline") {
-          fields += `<label class="text-xs text-stone-500">日数<input type="number" class="inp inp-sm ml-1" value="${r.days || 7}" data-rfield="days" data-idx="${idx}"></label>`;
+          fields += `<label class="text-xs text-gray-400">日数<input type="number" class="inp inp-sm ml-1" value="${r.days || 7}" data-rfield="days" data-idx="${idx}"></label>`;
         }
-        fields += `<label class="text-xs text-stone-500">色<input type="color" class="inp-color ml-1" value="${r.color || '#ef4444'}" data-rfield="color" data-idx="${idx}"></label>`;
+        fields += `<label class="text-xs text-gray-400">色<input type="color" class="inp-color ml-1" value="${r.color || '#ef4444'}" data-rfield="color" data-idx="${idx}"></label>`;
       }
 
       if (r.type === "statusMatch") {
-        fields += `<div class="text-xs text-stone-500">対象ステータス
-          <div class="flex flex-wrap gap-1.5 mt-1">${statusVals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-violet-500" ${(r.values || []).includes(v) ? 'checked' : ''} data-rfield="sval" data-idx="${idx}" data-val="${esc(v)}">${esc(v)}</label>`).join("")}</div></div>`;
+        fields += `<div class="text-xs text-gray-400">対象ステータス
+          <div class="flex flex-wrap gap-1.5 mt-1">${statusVals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-[#ff0066]" ${(r.values || []).includes(v) ? 'checked' : ''} data-rfield="sval" data-idx="${idx}" data-val="${esc(v)}">${esc(v)}</label>`).join("")}</div></div>`;
       }
 
       if (r.type === "fieldMatch") {
-        fields += `<label class="text-xs text-stone-500">対象カラム
+        fields += `<label class="text-xs text-gray-400">対象カラム
           <select class="inp ml-1" data-rfield="column" data-idx="${idx}"><option value="">—</option>${colOpts}</select></label>`;
         if (fieldVals.length) {
-          fields += `<div class="text-xs text-stone-500">対象値
-            <div class="flex flex-wrap gap-1.5 mt-1">${fieldVals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-violet-500" ${(r.values || []).includes(v) ? 'checked' : ''} data-rfield="fval" data-idx="${idx}" data-val="${esc(v)}">${esc(v)}</label>`).join("")}</div></div>`;
+          fields += `<div class="text-xs text-gray-400">対象値
+            <div class="flex flex-wrap gap-1.5 mt-1">${fieldVals.map(v => `<label class="flex items-center gap-0.5 text-xs cursor-pointer"><input type="checkbox" class="accent-[#ff0066]" ${(r.values || []).includes(v) ? 'checked' : ''} data-rfield="fval" data-idx="${idx}" data-val="${esc(v)}">${esc(v)}</label>`).join("")}</div></div>`;
         }
       }
 
-      return `<div class="mt-3 pt-3 border-t border-violet-50 space-y-2" onclick="event.stopPropagation()">${fields}</div>`;
+      return `<div class="mt-3 pt-3 border-t border-[#2a2a4a] space-y-2" onclick="event.stopPropagation()">${fields}</div>`;
     }
 
     function renderScoreColors() {
       const list = document.getElementById("score-colors-list");
       list.innerHTML = state.alerts.scoreColors.map((sc, i) => `
         <div class="flex items-center gap-2">
-          <label class="text-xs text-stone-500">min
+          <label class="text-xs text-gray-400">min
             <input type="number" class="inp inp-sm ml-1" value="${sc.min}" data-sc="min" data-idx="${i}">
           </label>
           <input type="color" class="inp-color" value="${sc.color}" data-sc="color" data-idx="${i}">
@@ -329,7 +336,7 @@
           if (row) {
             if (f === "role") { const badge = row.querySelector(".badge"); if (badge) badge.textContent = el.value; }
             if (f === "label") { const lbl = row.querySelector(".font-medium"); if (lbl) lbl.textContent = el.value; }
-            if (f === "name") { const nm = row.querySelector(".text-stone-400.text-xs"); if (nm) nm.textContent = `(${el.value})`; }
+            if (f === "name") { const nm = row.querySelector(".text-gray-500.text-xs"); if (nm) nm.textContent = `(${el.value})`; }
           }
         }
       }
