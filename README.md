@@ -3,6 +3,8 @@
 > スプシの課題データを、4体のAIペルソナが分析してくれるWebアプリ。
 > 忠犬・鬼マネージャー・関西のおばちゃん・ギャルが、あなたのチームを見守る。
 
+**[LP](https://shumatsumonobu.github.io/ai-youbou-mimamoritai/)**
+
 ---
 
 ## なぜ作った？
