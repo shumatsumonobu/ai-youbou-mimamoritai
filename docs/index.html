@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI要望みまもり隊 - スプシのフローを変えずに、AIのツッコミを足すだけ</title>
+  <meta name="description" content="スプシの課題データを4体のAIペルソナが分析。フローを変えずに「見たくなる仕組み」を足すだけのWebアプリ。">
+  <!-- OGP -->
+  <meta property="og:title" content="AI要望みまもり隊">
+  <meta property="og:description" content="スプシのフローを変えずに、AIのツッコミを足すだけ。4体のペルソナがあなたのチームを見守る。">
+  <meta property="og:image" content="https://shumatsumonobu.github.io/ai-youbou-mimamoritai/ogp.png">
+  <meta property="og:url" content="https://shumatsumonobu.github.io/ai-youbou-mimamoritai/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI要望みまもり隊">
+  <meta name="twitter:description" content="スプシのフローを変えずに、AIのツッコミを足すだけ。">
+  <meta name="twitter:image" content="https://shumatsumonobu.github.io/ai-youbou-mimamoritai/ogp.png">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #1a1a2e;
+      --border: #2a2a4a;
+      --pink: #ff0066;
+      --cyan: #00ccff;
+      --yellow: #ffcc00;
+      --green: #00ff66;
+      --purple: #6600ff;
+      --orange: #ff6600;
+      --text: #e0e0ff;
+      --text-dim: #8888aa;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--pink), var(--purple)); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--pink), var(--cyan)); }
+
+    /* neon text */
+    .neon-text {
+      background: linear-gradient(90deg, var(--pink), var(--cyan), var(--yellow), var(--green));
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: bg-shift 4s ease infinite;
+    }
+    @keyframes bg-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* fade-in on scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* layout */
+    section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 24px;
+    }
+    .hero .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      max-width: 600px;
+    }
+    .hero .tagline {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 48px;
+    }
+    .hero-screenshot {
+      max-width: 720px;
+      width: 90%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 40px rgba(255, 0, 102, 0.15), 0 0 80px rgba(0, 204, 255, 0.1);
+    }
+    .hero .scroll-hint {
+      position: absolute;
+      bottom: 32px;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    /* ===== PAIN ===== */
+    .pain-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .pain-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .pain-card:hover {
+      border-color: var(--pink);
+      box-shadow: 0 0 20px rgba(255, 0, 102, 0.2);
+    }
+    .pain-card .icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+    .pain-card h3 {
+      color: var(--pink);
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+    .pain-card p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    /* ===== SOLUTION ===== */
+    .solution {
+      text-align: center;
+    }
+    .solution-box {
+      background: linear-gradient(135deg, rgba(0, 204, 255, 0.08), rgba(255, 0, 102, 0.08));
+      border: 1px solid rgba(0, 204, 255, 0.3);
+      border-radius: 16px;
+      padding: 48px 32px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .solution-box .big {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .solution-box .big .highlight {
+      color: var(--cyan);
+    }
+    .solution-box p {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+    }
+
+    /* ===== PERSONA ===== */
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .persona-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+    .persona-card:hover {
+      transform: translateY(-4px);
+    }
+    .persona-card:nth-child(1):hover { border-color: var(--yellow); box-shadow: 0 0 24px rgba(255, 204, 0, 0.25); }
+    .persona-card:nth-child(2):hover { border-color: var(--pink); box-shadow: 0 0 24px rgba(255, 0, 102, 0.25); }
+    .persona-card:nth-child(3):hover { border-color: var(--orange); box-shadow: 0 0 24px rgba(255, 102, 0, 0.25); }
+    .persona-card:nth-child(4):hover { border-color: var(--green); box-shadow: 0 0 24px rgba(0, 255, 102, 0.25); }
+    .persona-card .persona-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .persona-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .persona-card:nth-child(1) h3 { color: var(--yellow); }
+    .persona-card:nth-child(2) h3 { color: var(--pink); }
+    .persona-card:nth-child(3) h3 { color: var(--orange); }
+    .persona-card:nth-child(4) h3 { color: var(--green); }
+    .persona-card .quote {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+    .persona-card .role {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    /* ===== FEATURES ===== */
+    .feature-block {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      margin-bottom: 64px;
+    }
+    .feature-block:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+    .feature-block:last-child {
+      margin-bottom: 0;
+    }
+    .feature-text {
+      flex: 1;
+    }
+    .feature-text h3 {
+      font-size: 1.3rem;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .feature-text p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+    .feature-img {
+      flex: 1;
+    }
+    .feature-img img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 20px rgba(102, 0, 255, 0.15);
+      transition: box-shadow 0.3s;
+    }
+    .feature-img img:hover {
+      box-shadow: 0 0 30px rgba(0, 204, 255, 0.25);
+    }
+
+    /* ===== FEATURE HERO (AI召喚) ===== */
+    .feature-hero {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .feature-hero h3 {
+      font-size: 1.5rem;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .feature-hero p {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+    .feature-hero-imgs {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    .feature-hero-imgs img {
+      width: 100%;
+      max-width: 720px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 30px rgba(255, 0, 102, 0.2);
+      transition: box-shadow 0.3s;
+    }
+    .feature-hero-imgs img:hover {
+      box-shadow: 0 0 40px rgba(0, 204, 255, 0.3);
+    }
+
+    /* ===== TECH ===== */
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+    }
+    .tech-badge {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      color: var(--cyan);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .tech-badge:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 204, 255, 0.2);
+    }
+
+    /* ===== CTA ===== */
+    .cta {
+      text-align: center;
+    }
+    .cta p {
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      font-size: 1.05rem;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--pink), var(--orange), var(--yellow));
+      border-radius: 50px;
+      box-shadow: 0 4px 24px rgba(255, 0, 102, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 32px rgba(255, 0, 102, 0.5);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      section { padding: 60px 16px; }
+      h2 { font-size: 1.5rem; }
+      .feature-block, .feature-block:nth-child(even) {
+        flex-direction: column;
+        gap: 24px;
+      }
+      .solution-box { padding: 32px 20px; }
+      .solution-box .big { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1 class="neon-text">AI要望みまもり隊</h1>
+    <p class="subtitle">スプシの課題データを、4体のAIペルソナが分析してくれるWebアプリ</p>
+    <p class="tagline">フローを変えずに、AIのツッコミを足すだけ。</p>
+    <img class="hero-screenshot" src="./01-main.png" alt="メイン画面">
+    <span class="scroll-hint">scroll</span>
+  </section>
+
+  <!-- PAIN -->
+  <section class="fade-in">
+    <h2 class="neon-text">スプシ運用、こうなってない？</h2>
+    <div class="pain-cards">
+      <div class="pain-card">
+        <div class="icon">&#128165;</div>
+        <h3>気づいたら期限切れ</h3>
+        <p>誰も一覧を俯瞰しないから、期限切れが静かに溜まっていく</p>
+      </div>
+      <div class="pain-card">
+        <div class="icon">&#9878;&#65039;</div>
+        <h3>偏りに気づけない</h3>
+        <p>特定の人にタスクが集中してるけど、データ見ないと分からないし言い出しにくい</p>
+      </div>
+      <div class="pain-card">
+        <div class="icon">&#128683;</div>
+        <h3>フローは変えられない</h3>
+        <p>「Webツール入れれば？」——それができない現場もある。スプシは動かせない</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTION -->
+  <section class="solution fade-in">
+    <h2 class="neon-text">だから「足す」だけにした</h2>
+    <div class="solution-box">
+      <p class="big">スプシはそのまま。<br><span class="highlight">AIのツッコミを足すだけ。</span></p>
+      <p>スプシを置き換えるんじゃなく、今の運用フローに乗っかる。<br>AIキャラがツッコんでくれるから「ちょっと見に行こうかな」が生まれる。</p>
+    </div>
+  </section>
+
+  <!-- PERSONA -->
+  <section class="fade-in">
+    <h2 class="neon-text">4体のAIペルソナ</h2>
+    <div class="persona-grid">
+      <div class="persona-card">
+        <div class="persona-icon">&#128054;</div>
+        <h3>忠犬</h3>
+        <p class="quote">「ワンワン！！期限過ぎてるワン！」</p>
+        <p class="role">危険を全力で知らせる</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-icon">&#128520;</div>
+        <h3>鬼マネージャー</h3>
+        <p class="quote">「田中、期限切れだぞ。今日中にやれ」</p>
+        <p class="role">冷たく圧をかける</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-icon">&#128105;</div>
+        <h3>関西のおばちゃん</h3>
+        <p class="quote">「あんた何しとん！はよしぃや！」</p>
+        <p class="role">愛のあるツッコミ</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-icon">&#128131;</div>
+        <h3>ギャル</h3>
+        <p class="quote">「てかさ、それまじでやばくない？」</p>
+        <p class="role">ノリは軽いけど分析はガチ</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section>
+    <h2 class="neon-text fade-in">できること</h2>
+
+    <div class="feature-hero fade-in">
+      <h3>AI召喚 - 全体サマリー</h3>
+      <p>ボタン一発でスプシ全件を分析。期限超過・負荷偏り・停滞・リスクを5つの観点でレポート。100点満点のスコアとペルソナのひとこと感想つき。</p>
+      <div class="feature-hero-imgs">
+        <img src="./03-summary-dog.png" alt="忠犬のサマリー結果">
+        <img src="./04-summary-gal.png" alt="ギャルのサマリー結果">
+      </div>
+    </div>
+
+    <div class="feature-block fade-in">
+      <div class="feature-text">
+        <h3>行クリックで個別コメント</h3>
+        <p>気になる課題をクリックすると、AIがその1件にフォーカスしてコメント。なぜ危険か、次に何をすべきかをキャラの口調で教えてくれる。</p>
+      </div>
+      <div class="feature-img">
+        <img src="./05-comment.png" alt="個別コメント">
+      </div>
+    </div>
+
+    <div class="feature-block fade-in">
+      <div class="feature-text">
+        <h3>フィルタ & 要注意しぼり込み</h3>
+        <p>ステータス・担当者・カテゴリで絞り込み。「要注意のみ」ボタンで期限超過や停滞タスクだけを一瞬で抽出。フィルタ中にAI召喚すれば、絞った範囲だけ分析。</p>
+      </div>
+      <div class="feature-img">
+        <img src="./06-persona-select.png" alt="ペルソナ選択とフィルタ">
+      </div>
+    </div>
+
+    <div class="feature-block fade-in">
+      <div class="feature-text">
+        <h3>設定画面でカスタマイズ</h3>
+        <p>スプシの列名マッピング、表示順、アラートルール、スコアの色しきい値をブラウザから編集。自分のスプシに合わせてすぐ使える。</p>
+      </div>
+      <div class="feature-img">
+        <img src="./07-settings-columns.png" alt="設定画面">
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH -->
+  <section class="fade-in">
+    <h2 class="neon-text">技術スタック</h2>
+    <div class="tech-list">
+      <span class="tech-badge">Node.js</span>
+      <span class="tech-badge">Express</span>
+      <span class="tech-badge">Google Sheets API</span>
+      <span class="tech-badge">Gemini 2.5 Flash</span>
+      <span class="tech-badge">Tabulator</span>
+      <span class="tech-badge">Tailwind CSS</span>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta fade-in">
+    <h2 class="neon-text">使ってみる</h2>
+    <p>セットアップは5分。スプシとGemini APIキーがあればすぐ動く。</p>
+    <a class="cta-btn" href="https://github.com/shumatsumonobu/ai-youbou-mimamoritai" target="_blank" rel="noopener">GitHub で見る</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <a href="https://github.com/shumatsumonobu">shumatsumonobu</a>
+      &nbsp;/&nbsp;
+      <a href="https://x.com/shumatsumonobu">X</a>
+      &nbsp;/&nbsp;
+      <a href="https://www.facebook.com/takuya.motoshima.7">Facebook</a>
+    </p>
+    <p style="margin-top: 8px;">MIT License</p>
+  </footer>
+
+  <script>
+    // fade-in on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
