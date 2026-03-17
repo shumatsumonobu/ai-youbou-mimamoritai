@@ -7,8 +7,16 @@ const { summarize, commentOnIssue, getPersonas } = require("./lib/summarizer");
 
 // config.json を毎リクエスト読み直す（設定画面から保存した変更を即反映）
 const configPath = path.join(__dirname, "config.json");
+const configDefaultPath = path.join(__dirname, "config.default.json");
+// デフォルト設定がなければ現在のconfigをコピーして作成
+if (!fs.existsSync(configDefaultPath)) {
+  fs.copyFileSync(configPath, configDefaultPath);
+}
 function loadConfig() {
   return JSON.parse(fs.readFileSync(configPath, "utf-8"));
+}
+function loadDefaultConfig() {
+  return JSON.parse(fs.readFileSync(configDefaultPath, "utf-8"));
 }
 
 const app = express();
@@ -21,21 +29,28 @@ app.get("/api/config", (req, res) => {
   res.json(frontConfig);
 });
 
-// 設定画面用（columns + alerts のみ）
+// 設定画面用（columns + filters + alerts）
 app.get("/api/config/full", (req, res) => {
   const config = loadConfig();
-  res.json({ columns: config.columns, alerts: config.alerts });
+  res.json({ columns: config.columns, filters: config.filters || [], alerts: config.alerts });
 });
 
-// 設定保存（columns + alerts を config.json に書き戻す）
+// デフォルト設定取得
+app.get("/api/config/default", (req, res) => {
+  const config = loadDefaultConfig();
+  res.json({ columns: config.columns, filters: config.filters || [], alerts: config.alerts });
+});
+
+// 設定保存（columns + filters + alerts を config.json に書き戻す）
 app.post("/api/config", (req, res) => {
   try {
     const current = loadConfig();
-    const { columns, alerts } = req.body;
+    const { columns, filters, alerts } = req.body;
     if (!Array.isArray(columns) || !alerts || !Array.isArray(alerts.rules)) {
       return res.status(400).json({ error: "不正なデータ形式です" });
     }
     current.columns = columns;
+    if (Array.isArray(filters)) current.filters = filters;
     current.alerts = alerts;
     fs.writeFileSync(configPath, JSON.stringify(current, null, 2), "utf-8");
     res.json({ ok: true });

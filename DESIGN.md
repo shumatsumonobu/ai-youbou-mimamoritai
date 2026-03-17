@@ -7,7 +7,8 @@
                                  → [Gemini API]        → 構造化JSON出力
 ```
 
-`config.json` 1ファイルで全制御。columns / alerts / table / ai の4セクションが独立。
+`config.json` 1ファイルで全制御。columns / filters / alerts / table / ai の5セクションが独立。
+初回起動時に `config.default.json` を自動生成（デフォルトリセット用）。
 
 ## ディレクトリ構成
 
@@ -21,7 +22,7 @@ ai-youbou-mimamoritai/
 │   └── config-helpers.js  # colByRole ユーティリティ
 ├── public/
 │   ├── index.html         # メイン画面（テーブル + AI召喚 + 行コメント）
-│   └── settings.html      # 設定画面（カラム・アラート編集）
+│   └── settings.html      # 設定画面（カラム・フィルター・アラート編集）
 ├── service-account-sheets.json  # Sheets用サービスアカウント（git管理外）
 ├── service-account-gemini.json  # Gemini用サービスアカウント（git管理外・任意）
 ├── .env                   # 環境変数（git管理外）
@@ -43,8 +44,9 @@ ai-youbou-mimamoritai/
 | メソッド | パス | 用途 |
 |---|---|---|
 | GET | /api/config | フロント用設定（ai セクション除外） |
-| GET | /api/config/full | 設定画面用（columns + alerts） |
-| POST | /api/config | 設定保存（columns + alerts を上書き） |
+| GET | /api/config/full | 設定画面用（columns + filters + alerts） |
+| GET | /api/config/default | デフォルト設定取得（リセット用） |
+| POST | /api/config | 設定保存（columns + filters + alerts を上書き） |
 | GET | /api/issues | スプレッドシートから全行取得 |
 | GET | /api/personas | ペルソナ一覧 |
 | POST | /api/summarize | AI全体サマリー生成 |
@@ -69,6 +71,10 @@ ai-youbou-mimamoritai/
 - `fieldMatch` — 特定フィールド値に一致
 
 `scoreColors` でスコア表示の色しきい値を定義。
+
+### filters
+
+メイン画面に表示するフィルター項目の role 配列。`field.values` を持つカラムはチェックボックス、持たないカラムはセレクトボックスで自動表示。
 
 ### table
 

@@ -10,6 +10,7 @@ service-account*.json
 
 # Local config override
 config.local.json
+config.default.json
 
 # Claude Code
 .claude/

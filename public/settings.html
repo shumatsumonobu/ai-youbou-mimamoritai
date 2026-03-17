@@ -54,7 +54,17 @@
         <h2 class="text-base font-bold text-[#00ccff]">カラム設定</h2>
         <button id="add-col-btn" class="btn btn-ghost text-sm">+ カラム追加</button>
       </div>
+      <p class="text-xs text-[#e0e0e0]/50 mb-3">スプシの列とUIの対応を定義。ドラッグで並び替え可能</p>
       <div id="columns-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="max-w-4xl mx-auto px-4 mb-6">
+    <div class="card">
+      <h2 class="text-base font-bold text-[#00ccff] mb-3">フィルター設定</h2>
+      <p class="text-xs text-[#e0e0e0]/50 mb-3">メイン画面に表示するフィルター項目を選択（field定義ありはチェックボックス、なしはセレクトボックスで表示）</p>
+      <div id="filters-list" class="space-y-2"></div>
     </div>
   </div>
 
@@ -65,6 +75,7 @@
         <h2 class="text-base font-bold text-[#00ccff]">アラート設定</h2>
         <button id="add-rule-btn" class="btn btn-ghost text-sm">+ ルール追加</button>
       </div>
+      <p class="text-xs text-[#e0e0e0]/50 mb-3">「要注意のみ」フィルターの条件と、スコア表示の色分けを設定</p>
       <div id="rules-list" class="space-y-2 mb-6"></div>
 
       <h3 class="text-sm font-bold text-[#ffcc00] mb-3">スコア色しきい値</h3>
@@ -76,13 +87,13 @@
   <!-- Footer -->
   <div class="fixed bottom-0 inset-x-0 bg-[#0a0a0a]/90 backdrop-blur-sm border-t border-[#2a2a4a] z-40">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-end gap-3">
-      <button id="reset-btn" class="btn btn-ghost">リセット</button>
-      <button id="save-btn" class="btn btn-primary px-6">保存</button>
+      <button id="reset-btn" class="btn btn-ghost text-base px-6 py-3">デフォルトに戻す</button>
+      <button id="save-btn" class="btn btn-primary text-base px-10 py-3">保存</button>
     </div>
   </div>
 
   <script>
-    let state = { columns: [], alerts: { rules: [], scoreColors: [] } };
+    let state = { columns: [], filters: [], alerts: { rules: [], scoreColors: [] } };
     let expandedCol = -1;
     let expandedRule = -1;
 
@@ -183,6 +194,37 @@
         <button class="btn btn-ghost text-xs" data-action="add-group" data-col="${colIdx}">+ グループ追加</button>
       </div>`;
     }
+
+    // ===== Filters =====
+
+    function renderFilters() {
+      const list = document.getElementById("filters-list");
+      list.innerHTML = state.columns.filter(c => c.role).map((c) => {
+        const checked = state.filters.includes(c.role);
+        const hasField = c.field && c.field.values;
+        const typeBadge = hasField
+          ? '<span class="badge bg-[#332200] text-[#ffcc00]">チェックボックス</span>'
+          : '<span class="badge bg-[#1a2a3e] text-[#00ccff]">セレクト</span>';
+        return `
+        <label class="flex items-center gap-3 cursor-pointer col-row">
+          <input type="checkbox" class="accent-[#ff0066] w-4 h-4" data-filter-role="${esc(c.role)}" ${checked ? 'checked' : ''}>
+          <span class="text-sm font-medium">${esc(c.label)}</span>
+          <span class="text-xs text-gray-500">(${esc(c.role)})</span>
+          ${typeBadge}
+        </label>`;
+      }).join("");
+    }
+
+    document.getElementById("filters-list").addEventListener("change", (e) => {
+      const el = e.target;
+      if (!el.dataset.filterRole) return;
+      const role = el.dataset.filterRole;
+      if (el.checked) {
+        if (!state.filters.includes(role)) state.filters.push(role);
+      } else {
+        state.filters = state.filters.filter(r => r !== role);
+      }
+    });
 
     // ===== Alerts =====
 
@@ -487,7 +529,7 @@
         const res = await fetch("/api/config", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ columns: state.columns, alerts: state.alerts }),
+          body: JSON.stringify({ columns: state.columns, filters: state.filters, alerts: state.alerts }),
         });
         const data = await res.json();
         if (data.ok) showToast("保存しました", true);
@@ -497,7 +539,21 @@
       }
     });
 
-    document.getElementById("reset-btn").addEventListener("click", () => { loadConfig(); });
+    document.getElementById("reset-btn").addEventListener("click", async () => {
+      if (!confirm("デフォルト設定に戻しますか？")) return;
+      const res = await fetch("/api/config/default");
+      const data = await res.json();
+      state.columns = JSON.parse(JSON.stringify(data.columns));
+      state.filters = JSON.parse(JSON.stringify(data.filters || []));
+      state.alerts = JSON.parse(JSON.stringify(data.alerts));
+      expandedCol = -1;
+      expandedRule = -1;
+      renderColumns();
+      renderFilters();
+      renderRules();
+      renderScoreColors();
+      showToast("デフォルトに戻しました（保存で確定）", true);
+    });
 
     // ===== Init =====
 
@@ -505,10 +561,12 @@
       const res = await fetch("/api/config/full");
       const data = await res.json();
       state.columns = JSON.parse(JSON.stringify(data.columns));
+      state.filters = JSON.parse(JSON.stringify(data.filters || []));
       state.alerts = JSON.parse(JSON.stringify(data.alerts));
       expandedCol = -1;
       expandedRule = -1;
       renderColumns();
+      renderFilters();
       renderRules();
       renderScoreColors();
     }

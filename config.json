@@ -1,8 +1,25 @@
 {
   "columns": [
-    { "role": "id", "name": "No", "label": "No", "width": 60, "align": "center" },
-    { "role": "title", "name": "タイトル", "label": "タイトル", "grow": true },
-    { "role": "owner", "name": "担当者", "label": "担当者", "width": 100, "align": "center" },
+    {
+      "role": "id",
+      "name": "No",
+      "label": "No",
+      "width": 60,
+      "align": "center"
+    },
+    {
+      "role": "title",
+      "name": "タイトル",
+      "label": "タイトル",
+      "grow": true
+    },
+    {
+      "role": "owner",
+      "name": "担当者",
+      "label": "担当者",
+      "width": 100,
+      "align": "center"
+    },
     {
       "role": "status",
       "name": "ステータス",
@@ -10,7 +27,12 @@
       "width": 120,
       "align": "center",
       "field": {
-        "values": ["未着手", "作業中", "レビュー", "完了"],
+        "values": [
+          "未着手",
+          "作業中",
+          "レビュー",
+          "完了"
+        ],
         "labels": {
           "未着手": "未着手",
           "作業中": "作業中",
@@ -24,8 +46,14 @@
           "完了": "#10b981"
         },
         "groups": {
-          "incomplete": ["未着手", "作業中", "レビュー"],
-          "complete": ["完了"],
+          "incomplete": [
+            "未着手",
+            "作業中",
+            "レビュー"
+          ],
+          "complete": [
+            "完了"
+          ],
           "stuck": []
         }
       }
@@ -37,35 +65,121 @@
       "width": 120,
       "align": "center",
       "field": {
-        "values": ["HIGH", "MEDIUM", "LOW"],
-        "labels": { "HIGH": "高", "MEDIUM": "中", "LOW": "低" },
-        "colors": { "HIGH": "#ef4444", "MEDIUM": "#f59e0b", "LOW": "#6b7280" }
+        "values": [
+          "HIGH",
+          "MEDIUM",
+          "LOW"
+        ],
+        "labels": {
+          "HIGH": "高",
+          "MEDIUM": "中",
+          "LOW": "低"
+        },
+        "colors": {
+          "HIGH": "#ef4444",
+          "MEDIUM": "#f59e0b",
+          "LOW": "#6b7280"
+        }
       }
     },
-    { "role": "client", "name": "カテゴリ", "label": "カテゴリ", "width": 140 },
-    { "role": "dueDate", "name": "期限", "label": "期限", "width": 120, "align": "center" },
-    { "role": "quarter", "name": "四半期", "label": "四半期", "width": 120 }
+    {
+      "role": "client",
+      "name": "カテゴリ",
+      "label": "カテゴリ",
+      "width": 140
+    },
+    {
+      "role": "dueDate",
+      "name": "期限",
+      "label": "期限",
+      "width": 120,
+      "align": "center"
+    },
+    {
+      "role": "quarter",
+      "name": "四半期",
+      "label": "四半期",
+      "width": 120
+    }
   ],
   "alerts": {
     "rules": [
-      { "type": "overdue", "column": "dueDate", "label": "期限超過", "color": "#ef4444" },
-      { "type": "nearDeadline", "column": "dueDate", "days": 7, "label": "期限間近（7日以内）", "color": "#d97706" },
-      { "type": "fieldMatch", "column": "priority", "values": ["HIGH"], "label": "高優先度" }
+      {
+        "type": "overdue",
+        "column": "dueDate",
+        "label": "期限超過",
+        "color": "#ef4444"
+      },
+      {
+        "type": "nearDeadline",
+        "column": "dueDate",
+        "days": 7,
+        "label": "期限間近（7日以内）",
+        "color": "#d97706"
+      },
+      {
+        "type": "fieldMatch",
+        "column": "priority",
+        "values": [
+          "HIGH"
+        ],
+        "label": "高優先度"
+      }
     ],
     "scoreColors": [
-      { "min": 80, "color": "#10b981" },
-      { "min": 70, "color": "#3b82f6" },
-      { "min": 50, "color": "#f59e0b" },
-      { "min": 30, "color": "#f97316" },
-      { "min": 0, "color": "#ef4444" }
+      {
+        "min": 80,
+        "color": "#10b981"
+      },
+      {
+        "min": 70,
+        "color": "#3b82f6"
+      },
+      {
+        "min": 50,
+        "color": "#f59e0b"
+      },
+      {
+        "min": 30,
+        "color": "#f97316"
+      },
+      {
+        "min": 0,
+        "color": "#ef4444"
+      }
     ]
   },
+  "filters": [
+    "status",
+    "owner",
+    "client",
+    "priority"
+  ],
   "table": {
-    "visibleColumns": ["id", "title", "owner", "status", "priority", "client", "dueDate"],
-    "frozenColumns": ["id", "title"]
+    "visibleColumns": [
+      "id",
+      "title",
+      "owner",
+      "status",
+      "priority",
+      "client",
+      "dueDate"
+    ],
+    "frozenColumns": [
+      "id",
+      "title"
+    ]
   },
   "ai": {
-    "sendColumns": ["title", "owner", "status", "priority", "client", "dueDate", "quarter"],
+    "sendColumns": [
+      "title",
+      "owner",
+      "status",
+      "priority",
+      "client",
+      "dueDate",
+      "quarter"
+    ],
     "model": "gemini-2.5-flash",
     "generation": {
       "temperature": 0.7,

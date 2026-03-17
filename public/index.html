@@ -85,15 +85,10 @@
             <div id="alert-tooltip" class="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-[#1a1a2e] rounded-xl shadow-lg border border-[#ff0066] p-3 w-56 z-50 text-xs text-gray-300 leading-relaxed"></div>
           </span>
         </label>
-        <div id="filter-status" class="flex flex-wrap items-center gap-x-3 gap-y-1"></div>
+        <div id="filter-checkboxes" class="flex flex-wrap items-center gap-x-5 gap-y-1"></div>
       </div>
       <div class="flex flex-wrap items-center gap-3">
-        <select id="filter-owner" class="bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a]">
-          <option value=""></option>
-        </select>
-        <select id="filter-client" class="bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a] max-w-[200px]">
-          <option value=""></option>
-        </select>
+        <div id="filter-selects" class="flex flex-wrap items-center gap-3"></div>
         <select id="sort-select" class="bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a]">
           <option value="">並び替え</option>
         </select>
@@ -245,16 +240,62 @@
 
     // --- dynamic UI builders ---
 
-    function buildStatusFilters() {
-      const container = document.getElementById("filter-status");
-      const sf = ((colDef("status") || {}).field) || {};
-      (sf.values || []).forEach((s) => {
-        const color = (sf.colors && sf.colors[s]) || "#78716c";
-        const label = (sf.labels && sf.labels[s]) || s;
-        const lbl = document.createElement("label");
-        lbl.className = "flex items-center gap-1 cursor-pointer";
-        lbl.innerHTML = `<input type="checkbox" value="${s}" class="status-cb w-3.5 h-3.5 rounded" style="accent-color:${esc(color)}"><span class="text-sm" style="color:${esc(color)}">${esc(label)}</span>`;
-        container.appendChild(lbl);
+    // filters: checkbox用とselect用を分類して保持
+    let _checkboxFilters = []; // field.valuesありのrole
+    let _selectFilters = [];   // field.valuesなしのrole
+
+    function buildFilters() {
+      const cbContainer = document.getElementById("filter-checkboxes");
+      const selContainer = document.getElementById("filter-selects");
+      (CFG.filters || []).forEach((role) => {
+        const def = colDef(role);
+        if (!def) return;
+        if (def.field && def.field.values) {
+          _checkboxFilters.push(role);
+          const group = document.createElement("div");
+          group.className = "flex flex-wrap items-center gap-x-3 gap-y-1 border-r border-white/40 pr-5";
+          group.dataset.filterRole = role;
+          const labelSpan = document.createElement("span");
+          labelSpan.className = "text-sm text-[#00ccff] font-medium mr-1";
+          labelSpan.textContent = def.label;
+          group.appendChild(labelSpan);
+          def.field.values.forEach((v) => {
+            const color = (def.field.colors && def.field.colors[v]) || "#78716c";
+            const label = (def.field.labels && def.field.labels[v]) || v;
+            const lbl = document.createElement("label");
+            lbl.className = "flex items-center gap-1 cursor-pointer";
+            lbl.innerHTML = `<input type="checkbox" value="${esc(v)}" data-role="${esc(role)}" class="filter-cb w-3.5 h-3.5 rounded" style="accent-color:${esc(color)}"><span class="text-sm" style="color:${esc(color)}">${esc(label)}</span>`;
+            group.appendChild(lbl);
+          });
+          group.addEventListener("change", applyFilters);
+          cbContainer.appendChild(group);
+        } else {
+          _selectFilters.push(role);
+          const select = document.createElement("select");
+          select.className = "bg-[#0a0a0a] text-gray-300 rounded-lg px-3 py-1.5 text-sm border border-[#2a2a4a]";
+          select.dataset.filterRole = role;
+          const defaultOpt = document.createElement("option");
+          defaultOpt.value = "";
+          defaultOpt.textContent = def.label;
+          select.appendChild(defaultOpt);
+          select.addEventListener("change", applyFilters);
+          selContainer.appendChild(select);
+        }
+      });
+    }
+
+    function populateSelectFilters(data) {
+      _selectFilters.forEach((role) => {
+        const colName = col(role);
+        const select = document.querySelector(`select[data-filter-role="${role}"]`);
+        if (!select || !colName) return;
+        const values = [...new Set(data.map((r) => r[colName]).filter(Boolean))].sort();
+        values.forEach((v) => {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          select.appendChild(opt);
+        });
       });
     }
 
@@ -328,27 +369,7 @@
       refreshToday();
       const res = await fetch("/api/issues");
       allData = await res.json();
-
-      const ownerCol = col("owner");
-      const clientCol = col("client");
-      const owners = [...new Set(allData.map((r) => r[ownerCol]).filter(Boolean))].sort();
-      const clients = [...new Set(allData.map((r) => r[clientCol]).filter(Boolean))].sort();
-
-      const ownerSelect = document.getElementById("filter-owner");
-      owners.forEach((o) => {
-        const opt = document.createElement("option");
-        opt.value = o;
-        opt.textContent = o;
-        ownerSelect.appendChild(opt);
-      });
-
-      const clientSelect = document.getElementById("filter-client");
-      clients.forEach((c) => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        clientSelect.appendChild(opt);
-      });
+      populateSelectFilters(allData);
 
       table = new Tabulator("#issues-table", {
         data: allData,
@@ -364,23 +385,28 @@
 
     // --- filters ---
 
-    function getSelectedStatuses() {
-      return [...document.querySelectorAll(".status-cb:checked")].map((cb) => cb.value);
-    }
-
     function applyFilters() {
-      const statuses = getSelectedStatuses();
-      const owner = document.getElementById("filter-owner").value;
-      const client = document.getElementById("filter-client").value;
-      const statusCol = col("status");
-      const ownerCol = col("owner");
-      const clientCol = col("client");
-
       let filtered = allData;
       if (alertMode) filtered = filtered.filter(isAlert);
-      if (statuses.length > 0) filtered = filtered.filter((r) => statuses.includes(r[statusCol]));
-      if (owner) filtered = filtered.filter((r) => r[ownerCol] === owner);
-      if (client) filtered = filtered.filter((r) => r[clientCol] === client);
+
+      // チェックボックスフィルター
+      _checkboxFilters.forEach((role) => {
+        const checked = [...document.querySelectorAll(`.filter-cb[data-role="${role}"]:checked`)].map((cb) => cb.value);
+        if (checked.length > 0) {
+          const colName = col(role);
+          filtered = filtered.filter((r) => checked.includes(r[colName]));
+        }
+      });
+
+      // セレクトフィルター
+      _selectFilters.forEach((role) => {
+        const select = document.querySelector(`select[data-filter-role="${role}"]`);
+        if (select && select.value) {
+          const colName = col(role);
+          filtered = filtered.filter((r) => r[colName] === select.value);
+        }
+      });
+
       table.setData(filtered);
     }
 
@@ -389,15 +415,11 @@
       applyFilters();
     });
 
-    document.getElementById("filter-owner").addEventListener("change", applyFilters);
-    document.getElementById("filter-client").addEventListener("change", applyFilters);
-
     document.getElementById("clear-btn").addEventListener("click", () => {
       document.getElementById("filter-alert").checked = false;
       alertMode = false;
-      document.querySelectorAll(".status-cb").forEach((cb) => cb.checked = false);
-      document.getElementById("filter-owner").value = "";
-      document.getElementById("filter-client").value = "";
+      document.querySelectorAll(".filter-cb").forEach((cb) => cb.checked = false);
+      document.querySelectorAll("#filter-selects select").forEach((s) => s.value = "");
       document.getElementById("sort-select").value = "";
       table.clearSort();
       applyFilters();
@@ -507,10 +529,11 @@
     }
 
     function hasActiveFilter() {
-      return alertMode ||
-        getSelectedStatuses().length > 0 ||
-        document.getElementById("filter-owner").value ||
-        document.getElementById("filter-client").value;
+      if (alertMode) return true;
+      if (document.querySelectorAll(".filter-cb:checked").length > 0) return true;
+      const selects = document.querySelectorAll("#filter-selects select");
+      for (const s of selects) { if (s.value) return true; }
+      return false;
     }
 
     document.getElementById("fab-btn").addEventListener("click", async () => {
@@ -554,13 +577,6 @@
       });
     }
 
-    function setFilterLabels() {
-      const ownerDef = colDef("owner");
-      const clientDef = colDef("client");
-      if (ownerDef) document.querySelector("#filter-owner option[value='']").textContent = ownerDef.label;
-      if (clientDef) document.querySelector("#filter-client option[value='']").textContent = clientDef.label;
-    }
-
     function buildAlertTooltip() {
       const rules = CFG.alerts.rules || [];
       const tip = document.getElementById("alert-tooltip");
@@ -582,11 +598,9 @@
         CFG = await cfgRes.json();
         cacheIncomplete();
         cacheAlertColors();
-        setFilterLabels();
-        buildStatusFilters();
+        buildFilters();
         buildSortOptions();
         buildAlertTooltip();
-        document.getElementById("filter-status").addEventListener("change", applyFilters);
         await loadData();
       } catch (err) {
         document.getElementById("issues-table").innerHTML = `<div class="bg-red-50 rounded-2xl p-6 text-center text-red-500 font-bold">${esc(err.message || "データの読み込みに失敗しました")}</div>`;

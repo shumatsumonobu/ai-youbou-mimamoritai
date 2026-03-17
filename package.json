@@ -1,6 +1,6 @@
 {
   "name": "ai-youbou-mimamoritai",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "忠犬・鬼上司・関西のおばちゃん・ギャルが課題を見守るWebアプリ",
   "main": "server.js",
   "scripts": {
