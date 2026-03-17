@@ -83,15 +83,14 @@
 
 ### 1. Google Cloud の準備
 
-- サービスアカウント作成 → JSONキーをダウンロード → プロジェクトルートに `service-account.json` として配置
-- Google Sheets API を有効化
-- 対象のスプレッドシートにサービスアカウントのメールを「閲覧者」として共有
+- **Sheets用**: サービスアカウント作成 → JSONキーを `service-account-sheets.json` として配置
+  - Google Sheets API を有効化
+  - 対象スプシにサービスアカウントのメールを「閲覧者」として共有
+- **Gemini用**（2つの方法から選択）:
+  - **APIキー**: [Google AI Studio](https://aistudio.google.com/) で発行
+  - **サービスアカウント（Vertex AI）**: JSONキーを `service-account-gemini.json` として配置（こちらが優先）
 
-### 2. Gemini API キーの取得
-
-- [Google AI Studio](https://aistudio.google.com/) で APIキーを発行
-
-### 3. 環境変数
+### 2. 環境変数
 
 ```bash
 cp .env.example .env
@@ -101,17 +100,18 @@ cp .env.example .env
 
 | 変数 | 説明 |
 |---|---|
-| `GOOGLE_SERVICE_ACCOUNT_KEY` | サービスアカウントキーのパス（デフォルト: `./service-account.json`） |
+| `SHEETS_SERVICE_ACCOUNT_KEY` | Sheets用サービスアカウントキーのパス |
 | `SPREADSHEET_ID` | スプシURLの `/d/` と `/edit` の間の文字列 |
 | `SHEET_NAME` | シート名（タブ名） |
-| `GEMINI_API_KEY` | Google AI Studio で取得したAPIキー |
+| `GEMINI_API_KEY` | Gemini APIキー |
+| `GEMINI_SERVICE_ACCOUNT_KEY` | Gemini用サービスアカウントキーのパス（設定時はAPIキーより優先） |
 
-### 4. サンプルデータで試す
+### 3. サンプルデータで試す
 
 `sample-data.csv` をスプレッドシートにインポートすればすぐ動く
 期限切れ・負荷偏り・停滞を仕込み済み。AIペルソナが盛り上がるデータ
 
-### 5. 起動
+### 4. 起動
 
 ```bash
 npm install

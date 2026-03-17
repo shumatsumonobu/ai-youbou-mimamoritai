@@ -22,6 +22,8 @@ ai-youbou-mimamoritai/
 ├── public/
 │   ├── index.html         # メイン画面（テーブル + AI召喚 + 行コメント）
 │   └── settings.html      # 設定画面（カラム・アラート編集）
+├── service-account-sheets.json  # Sheets用サービスアカウント（git管理外）
+├── service-account-gemini.json  # Gemini用サービスアカウント（git管理外・任意）
 ├── .env                   # 環境変数（git管理外）
 └── .gitignore
 ```
@@ -31,7 +33,7 @@ ai-youbou-mimamoritai/
 - **ランタイム**: Node.js
 - **フレームワーク**: Express
 - **Google Sheets API**: `googleapis`（サービスアカウント認証）
-- **AI**: Gemini 2.5 Flash（構造化JSON出力）
+- **AI**: `@google/genai` — Gemini 2.5 Flash（構造化JSON出力）。APIキー or サービスアカウント（Vertex AI）切り替え可能
 - **フロント**: Tailwind CSS CDN + vanilla JS
 - **テーブル**: Tabulator（列固定・フィルタ・ソート）
 - **フォント**: Zen Maru Gothic + Noto Sans JP
